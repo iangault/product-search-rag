@@ -1,0 +1,33 @@
+# data processing
+pandas
+numpy
+duckdb
+pyarrow
+
+# viz
+matplotlib
+plotly
+altair
+vegafusion
+vl-convert-python
+
+# ML
+scikit-learn
+rank-bm25
+sentence-transformers
+faiss-cpu
+
+# utils
+python-dotenv
+requests
+jupyter
+ipykernel
+
+# apps
+shiny
+shinywidgets
+streamlit
+
+# testing
+# pytest>=8.0.0
+# pytest-playwright>=0.5.0
