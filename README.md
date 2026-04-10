@@ -31,4 +31,8 @@ conda activate 575_proj
 
 4. Setup environment variables:
 
-    Create a `.env` file in root directory
+    Create a `.env` file in root directory and add the following lines, as needed:
+    ```bash
+    HF_TOKEN=...
+    ANTHROPIC_API_KEY=...  # Last milestone only
+    ```
