@@ -16,12 +16,12 @@ stemmer = SnowballStemmer("english")
 
 def text_preprocessor(text):
     """
-    Cleans and tokenizes text.
+    Cleans and tokenizes text. Can take in strings, lists of strings and missing values. It will lowercase, tokenize, remove punctuation and stopwords, and stem text for strings. For list of strings, it will apply the above process to each string in the list. For missing values, it will return an empty list.
 
     Parameters
     ----------
-    text : str
-        The raw text.
+    text : str, list or None
+        Raw input to be cleaned and tokenized.
 
     Returns
     -------
@@ -33,15 +33,35 @@ def text_preprocessor(text):
     >>> sample_text = "Primula Brew Buddy Portable Pour Over, Reusable Filter"
     >>> text_preprocessor(sample_text)
     ['primula', 'brew', 'buddi', 'portabl', 'pour', 'reusabl', 'filter']
-    
+
+    >>> sample_list = ["Primula Brew Buddy", "Portable Pour Over", "Reusable Filter"]
+    >>> text_preprocessor(sample_list)
+    ['primula', 'brew', 'buddi', 'portabl', 'pour', 'reusabl', 'filter']
+
+    >>> mixed_list = [float('nan'), None, "Portable Pour Over", "Reusable Filter"]
+    >>> text_preprocessor(mixed_list)
+    ['portabl', 'pour', 'reusabl', 'filter']
+
+    >>> text_preprocessor(None)
+    []
+
     """
 
-    # catch blank/NaN entries
-    if not isinstance(text, str):
+    # for text is type str
+    if isinstance(text, str):
+        tokens = text.lower().split()
+    
+    # for text is type list of str
+    elif isinstance(text, list):
+        tokens = [
+            word
+            for item in text if isinstance(item, str)
+            for word in item.lower().split()
+        ]
+    
+    # for text is type NaN or None
+    else:
         return []
-
-    text = text.lower()
-    tokens = text.split()
 
     clean_tokens = []
 

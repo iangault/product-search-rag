@@ -36,6 +36,9 @@ class BM25Search:
 
         """
 
+        if isinstance(products, str):
+            products = [products]
+
         self.products = products
         self.tokenized_corpus = [text_preprocessor(doc) for doc in products]
         self.bm25 = BM25Okapi(self.tokenized_corpus)
