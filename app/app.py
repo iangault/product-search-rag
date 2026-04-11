@@ -9,23 +9,25 @@ import numpy as np
 
 # get proj root dir and add to path so can import from src
 root_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(root_dir)) # tells Python to look in root dir for imports
+if str(root_dir) not in sys.path:
+    sys.path.append(str(root_dir)) # tells Python to look in root dir for imports
+
 from src.bm25 import BM25Search
 #from src.semantic import SemanticSearch 
 
 st.title("Amazon Appliances Search 🛒", text_alignment="left")
 
-DATA_PATH = root_dir / "data" / "processed" / "merged.parquet"
-INDEX_PATH = root_dir / "data" / "processed" / "bm25_index.pkl"
+data_path = root_dir / "data" / "processed" / "merged.parquet"
+index_path = root_dir / "data" / "processed" / "bm25_index.pkl"
 
 # cache the data
 @st.cache_data
 def load_data():
-    return pd.read_parquet(DATA_PATH)
+    return pd.read_parquet(data_path)
 
 @st.cache_resource
 def load_search():
-    bm25 = BM25Search.load(INDEX_PATH)
+    bm25 = BM25Search.load(index_path)
     #semantic = SemanticSearch()
     return bm25#, semantic
 
@@ -46,12 +48,12 @@ search_mode = st.radio(
 query = st.text_input("Enter search query:", placeholder="eg stainless steel coffee maker")
 
 if query:
-    st.subheader(f"Top 3 Results for '{query}' using {search_mode} search")
+    st.subheader(f"Top 10 Results for '{query}' using {search_mode} search")
 
     st.divider()
 
     if search_mode == "BM25":
-        results = bm25_search.retrieve(query, top_k=3)
+        results = bm25_search.retrieve(query, top_k=10)
 
     #else:
         # results = semantic_search.retrieve(query, top_k=3)
