@@ -5,32 +5,41 @@ from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer # suffix stripping
 import string
 
-# initial download only
-nltk.download("stopwords", quiet=True)
+# download only if not present
+try:
+    nltk.data.find("corpora/stopwords")
+except LookupError:
+    nltk.download("stopwords", quiet=True)
 
 stop_words = set(stopwords.words("english"))
 stemmer = SnowballStemmer("english")
 
 def text_preprocessor(text):
     """
-    Cleans and tokenizes text
+    Cleans and tokenizes text.
 
     Parameters
     ----------
     text : str
-        raw text
+        The raw text.
 
     Returns
     -------
     list of str
-        list of clean tokens in text
+        List of clean tokens in text.
 
     Examples
     --------
-    >>> sample_text = "Primula Brew Buddy Portable Pour Over, Reusable Fine Mesh Filter, Dishwasher Safe, Single Cup of Coffee or Tea at Any Strength, Ideal for Travel or Camping, 404.88 milliliters, Red"
+    >>> sample_text = "Primula Brew Buddy Portable Pour Over, Reusable Filter"
     >>> text_preprocessor(sample_text)
-    ['primula', 'brew', 'buddi', 'portabl', 'pour', 'reusabl', 'fine', 'mesh', 'filter', 'dishwash', 'safe', 'singl', 'cup', 'coffe', 'tea', 'strength', 'ideal', 'travel', 'camp', '404.88', 'millilit', 'red']
+    ['primula', 'brew', 'buddi', 'portabl', 'pour', 'reusabl', 'filter']
+    
     """
+
+    # catch blank/NaN entries
+    if not isinstance(text, str):
+        return []
+
     text = text.lower()
     tokens = text.split()
 
