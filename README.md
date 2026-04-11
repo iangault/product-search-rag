@@ -36,3 +36,8 @@ conda activate 575_proj
     HF_TOKEN=...
     ANTHROPIC_API_KEY=...  # Last milestone only
     ```
+
+5. Run Streamlit app:
+```bash
+streamlit run app/app.py
+```
