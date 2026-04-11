@@ -33,8 +33,8 @@ https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow
 4. Prepare Data and Search Index (Optional):
 
    There is preprocessed data and index available in the repository for immediate use. To regenerate them:
-   * run all cells in `notebooks/milestone1_exploration.ipynb` to generate `merged.parquet`
-   * run indexing script to generate `m25_index.pkl`
+   * run all cells in `notebooks/milestone1_exploration.ipynb` to generate `data/processed/merged.parquet`
+   * run indexing script to generate `data/processed/bm25_index.pkl`
    ```bash
    python src/build_index.py
    ``` 
@@ -47,7 +47,7 @@ https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow
     ANTHROPIC_API_KEY=<your_key_here>  # Required for future milestones only
     ```
 
-7. Run Streamlit app:
+6. Run Streamlit app:
     ```bash
     streamlit run app/app.py
     ```
