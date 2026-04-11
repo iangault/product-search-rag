@@ -28,7 +28,7 @@ To interact with the information retrieval systems, we developed a simple web ap
 
 * Detailed Search Results: For each retrieved product, the app will display the product title, a truncated review, the star rating and the retrieval score (BM25 or Semantic)
 
-### Setup Instructions
+### Repository Installation
 
 1.  **Installation** After opening a terminal, clone the repository and navigate to the project directory:
     ```bash
@@ -36,10 +36,26 @@ To interact with the information retrieval systems, we developed a simple web ap
     cd DSCI_575_project_gaultian_chrchow
     ```
 
-2.  **Environment Setup** Create and activate the Conda environment:
+### Setup Instructions
+
+**Note**: For a summary of makefile actions:
+
+```bash
+make help
+```
+
+2.  **Environment Setup**
+
+    1. Create or Prune the Conda environment:
 
     ``` bash
-    conda env create -f environment.yml
+    make create
+    make prune
+    ```
+
+    2. Activate the Conda environment:
+
+    ```bash
     conda activate 575_proj
     ```
 
@@ -57,13 +73,19 @@ To interact with the information retrieval systems, we developed a simple web ap
     2.  **Indexing:** run the indexing script in to build BM25 and Semantic search indices:
 
         ``` bash
-        python src/build_index.py
+        make build
         ```
 
         Note: Preprocessed indices may already be available in `data/processed/` for immediate use.
 
+        **Remove index data** in `data/processed/`:
+
+        ``` bash
+        make clean
+        ```
+
 5.  **Running the Web App** Launch the Streamlit dashboard:
 
     ```bash
-    streamlit run app/app.py
+    make run
     ```

@@ -1,10 +1,11 @@
-# adapted from 563_lab3 preprocess.py
+# Utility Functions for Project
 
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer # suffix stripping
 import string
 
+# adapted from 563_lab3 preprocess.py
 # download only if not present
 try:
     nltk.data.find("corpora/stopwords")
@@ -50,7 +51,7 @@ def text_preprocessor(text):
     # for text is type str
     if isinstance(text, str):
         tokens = text.lower().split()
-    
+
     # for text is type list of str
     elif isinstance(text, list):
         tokens = [
@@ -58,7 +59,7 @@ def text_preprocessor(text):
             for item in text if isinstance(item, str)
             for word in item.lower().split()
         ]
-    
+
     # for text is type NaN or None
     else:
         return []
@@ -73,3 +74,55 @@ def text_preprocessor(text):
             clean_tokens.append(stem_token)
 
     return clean_tokens
+
+def normalize(col):
+    """Helper function for converting mixed dataframe
+      column types into strings
+
+    This module keeps string columns the same, and converts lists
+    and dictionaries into readable text.
+    Output is still in original row and column index.
+
+    Args:
+        col (str, list, dict): name of input column
+
+    Returns:
+        _type_: col of strings
+    """
+    if isinstance(col, str):
+        return col
+
+    if isinstance(col, list):
+        strings = [normalize(item) for item in col]
+        return " ".join(string for string in strings if string).strip()
+
+    if isinstance(col, dict):
+        strings = [f"{k} {normalize(v)}" for k, v in col.items()]
+        return " ".join(string for string in strings if string).strip()
+
+    return ""
+
+def build_documents(df, columns):
+    """Buils one searchable document string per dataframe row by combining the normalized text from one or more selected column
+
+    This is used before retrieval so that we have one source of combined text information
+
+    Args:
+        df (df): dataframe with normalized text columns
+        columns (list or str): column name if one column, or list of columns
+
+    Returns:
+        documents: list of documents where each item is a combination of normalized texts per observation
+    """
+
+    if isinstance(columns, str):
+        columns = [columns]
+
+    documents = []
+
+    for _, row in df.iterrows():
+        strings = [normalize(row[col]) for col in columns]
+        doc = " ".join(string for string in strings if string).strip()
+        documents.append(doc)
+
+    return documents

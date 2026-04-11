@@ -28,6 +28,7 @@ ipykernel
 shiny
 shinywidgets
 streamlit
+torchvision
 
 # testing
 # pytest>=8.0.0

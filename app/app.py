@@ -13,12 +13,16 @@ if str(root_dir) not in sys.path:
     sys.path.append(str(root_dir)) # tells Python to look in root dir for imports
 
 from src.bm25 import BM25Search
-#from src.semantic import SemanticSearch 
+from src.semantic import SemanticSearch
 
 st.title("Amazon Appliances Search 🛒", text_alignment="left")
 
+# Processed Data
 data_path = root_dir / "data" / "processed" / "merged.parquet"
-index_path = root_dir / "data" / "processed" / "bm25_index.pkl"
+# Path to the BM25 index
+index_path_bm = root_dir / "data" / "processed" / "bm25_index.pkl"
+# Path to the SemanticSearch index
+index_path_sem = root_dir / "data" / "processed" / "semantic_index.pkl"
 
 # cache the data
 @st.cache_data
@@ -27,20 +31,20 @@ def load_data():
 
 @st.cache_resource
 def load_search():
-    bm25 = BM25Search.load(index_path)
-    #semantic = SemanticSearch()
-    return bm25#, semantic
+    bm25 = BM25Search.load(index_path_bm)
+    semantic = SemanticSearch.load(index_path_sem)
+    return bm25, semantic
 
 # load data
 df = load_data()
-bm25_search = load_search() #bm25_search, semantic_search = load_search()
+bm25_search, semantic_search = load_search()
 
 st.divider()
 
 # search mode selector - radio buttons
 search_mode = st.radio(
     "Select Search Mode:",
-    ["BM25"], #["BM25", "Semantic"],
+    ["BM25", "Semantic"],
     horizontal=True
 )
 
@@ -55,8 +59,8 @@ if query:
     if search_mode == "BM25":
         results = bm25_search.retrieve(query, top_k=10)
 
-    #else:
-        # results = semantic_search.retrieve(query, top_k=3)
+    else:
+        results = semantic_search.retrieve(query, top_k=10)
     
     # display results
     for title, score in results:
