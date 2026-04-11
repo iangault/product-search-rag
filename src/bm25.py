@@ -2,6 +2,7 @@
 
 from rank_bm25 import BM25Okapi
 from src.utils import text_preprocessor
+import pickle
 
 class BM25Search:
     """
@@ -67,3 +68,33 @@ class BM25Search:
         results = [(self.products[i], float(scores[i])) for i in top_idx]
 
         return results
+    
+    # adapted from 524 coursebook 21.6.3 Model objects
+    def save(self, filepath="data/processed/bm25_index.pkl"):
+        """
+        Save the tokenized corpus and BM25 index to pickle file.
+        
+        Parameters
+        ----------
+        filepath : str
+            Path where pickle file will be saved.
+
+        """
+
+        with open(filepath, "wb") as f:
+            pickle.dump(self, f)
+
+    @staticmethod
+    def load(filepath="data/processed/bm25_index.pkl"):
+        """
+        Load the saved tokenized corpus and BM25 index.
+        
+        Parameters
+        ----------
+        filepath : str
+            Path where pickle file was saved.
+    
+        """
+
+        with open(filepath, "rb") as f:
+            return pickle.load(f)
