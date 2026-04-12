@@ -75,7 +75,7 @@ class SemanticSearch:
         scores, indices = self.index.search(query_embedding, top_k)
 
         # Create a list for results presentation
-        results = [(self.df.iloc[i]["product_title"], float(scores[0][rank]))
+        results = [(int(i), float(scores[0][rank]))
                    for rank, i in enumerate(indices[0])]
 
         return results

@@ -68,7 +68,7 @@ class BM25Search:
                              key=lambda i: scores[i], 
                              reverse=True)[:top_k]
         
-        results = [(self.products[i], float(scores[i])) for i in top_idx]
+        results = [(i, float(scores[i])) for i in top_idx]
 
         return results
     
