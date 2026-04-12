@@ -22,6 +22,7 @@ Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from
 
 BM25 and SemanticSearch are defined in their own scripts, but as called in `build_index.py`
 
+```text
 DSCI_575_project_gaultian_chrchow/
 ├── app/
 │   └── app.py
@@ -61,7 +62,7 @@ DSCI_575_project_gaultian_chrchow/
 │
 └── Makefile
     Convenience commands for environment setup, index building, app launch, and cleanup.
-
+```
 
 ### Web App Features
 
