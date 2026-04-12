@@ -45,13 +45,17 @@ st.divider()
 search_mode = st.radio(
     "Select Search Mode:",
     ["BM25", "Semantic"],
-    horizontal=True
+    horizontal=True,
+    key = "search_mode",
 )
 
-# query input - text box
-query = st.text_input("Enter search query:", placeholder="eg stainless steel coffee maker")
+with st.form("search_form"):
+    query = st.text_input("Enter search query:",
+                          placeholder="eg stainless steel coffee maker",
+                          key = "search_query")
+    submitted = st.form_submit_button("Search")
 
-if query:
+if submitted and query:
     st.subheader(f"Top 10 Results for '{query}' using {search_mode} search")
 
     st.divider()

@@ -11,6 +11,9 @@ if str(root_dir) not in sys.path:
 from src.bm25 import BM25Search
 from src.semantic import SemanticSearch
 
+from dotenv import load_dotenv
+load_dotenv()
+
 def main():
     """
     Execute script to build the BM25 and Semantic Search
