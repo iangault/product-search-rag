@@ -18,6 +18,51 @@ BM25 search was performed using the [`rank_bm25`](https://pypi.org/project/rank-
 
 Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from the [`sentence-transformers`](https://huggingface.co/sentence-transformers) to generate document embeddings. These embeddings were then indexed using [FAISS](https://faiss.ai/index.html) (Facebook AI Similarity Search) to enable similarity searches. Cosine similarity was used to calculate vector similarity and results are retrieved using k-nearest neighbours.
 
+### Repository Structure
+
+BM25 and SemanticSearch are defined in their own scripts, but as called in `build_index.py`
+
+DSCI_575_project_gaultian_chrchow/
+├── app/
+│   └── app.py
+│      Streamlit application for running BM25 and semantic product search.
+│
+├── data/
+│   ├── raw/
+│   │   Original input data files.
+│   └── processed/
+│       Processed data and saved retrieval indexes used by the app.
+│
+├── src/
+│   ├── bm25.py
+│   │   BM25 retrieval class, including index building, searching, saving, and loading.
+│   ├── semantic.py
+│   │   Semantic retrieval class using SentenceTransformers and FAISS.
+│   ├── normalize.py
+│   │   Helper function(s) to convert mixed column types like strings, lists, and dictionaries into plain text.
+│   ├── build_documents.py
+│   │   Builds one searchable document string per row by combining selected columns.
+│   ├── build_index.py
+│   │   Script to build and save BM25 and semantic search indexes from the processed dataset.
+│   └── utils.py
+│       Text preprocessing utilities used for BM25 tokenization and stemming.
+│
+├── notebooks/
+│   Project notebooks for EDA, preprocessing, and experimentation.
+│
+├── requirements.txt
+│   Python package requirements.
+│
+├── environment.yml
+│   Conda environment specification for reproducing the project setup.
+│
+├── README.md
+│   Project overview, setup instructions, and usage documentation.
+│
+└── Makefile
+    Convenience commands for environment setup, index building, app launch, and cleanup.
+
+
 ### Web App Features
 
 To interact with the information retrieval systems, we developed a simple web app using Streamlit. Features include:
