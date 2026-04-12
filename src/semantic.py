@@ -1,5 +1,4 @@
 import faiss
-import pickle
 from sentence_transformers import SentenceTransformer
 from src.utils import normalize
 from src.utils import build_documents
@@ -80,7 +79,7 @@ class SemanticSearch:
 
         return results
 
-    def save(self, filepath="data/processed/semantic_index.pkl"):
+    def save(self, filepath="data/processed/semantic.index"):
         """Save the FAISS structure of ducment embeddings of corpus,
         so that it can later be compared to query embeddings.
 
@@ -100,11 +99,11 @@ class SemanticSearch:
         # with open(docs_path, "wb") as f:
         #     pickle.dump(self.documents, f)
 
-        with open(filepath, "wb") as f:
-            pickle.dump(self, f)
+        # Saves the searchable vector index (vectors and positions)
+        faiss.write_index(self.index, str(filepath))
 
     @staticmethod
-    def load(filepath="data/processed/semantic_index.pkl"):
+    def load(filepath="data/processed/semantic.index"):
         """Load a previously saved FAISS index and document string.
 
         Args:
@@ -131,7 +130,13 @@ class SemanticSearch:
         # Read in searchable vector index
         # engine.index = faiss.read_index(str(index_path))
 
-        # Read in document text
-        with open(filepath, "rb") as f:
-            # engine.documents = pickle.load(f)
-            return pickle.load(f)
+        # Create empty object to add out engine to
+        engine = SemanticSearch.__new__(SemanticSearch)
+
+        # SentenceTransformer initialized for new queries
+        engine.model = SentenceTransformer("all-MiniLM-L6-v2")
+
+        # Read in searchable vector index
+        engine.index = faiss.read_index(str(filepath))
+
+        return engine

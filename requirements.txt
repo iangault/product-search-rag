@@ -6,17 +6,21 @@ pyarrow
 nltk
 
 # viz
-matplotlib
-plotly
+#matplotlib
+#plotly
 altair
 vegafusion
 vl-convert-python
 
 # ML
-scikit-learn
+#scikit-learn
 rank-bm25
 sentence-transformers
 faiss-cpu
+
+# LLM / RAG
+#langchain
+#langchain-community
 
 # utils
 python-dotenv
@@ -25,8 +29,8 @@ jupyter
 ipykernel
 
 # apps
-shiny
-shinywidgets
+#shiny
+#shinywidgets
 streamlit
 torchvision
 

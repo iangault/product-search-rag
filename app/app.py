@@ -22,7 +22,7 @@ data_path = root_dir / "data" / "processed" / "merged.parquet"
 # Path to the BM25 index
 index_path_bm = root_dir / "data" / "processed" / "bm25_index.pkl"
 # Path to the SemanticSearch index
-index_path_sem = root_dir / "data" / "processed" / "semantic_index.pkl"
+index_path_sem = root_dir / "data" / "processed" / "semantic.index"
 
 # cache the data
 @st.cache_data

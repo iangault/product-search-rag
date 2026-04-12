@@ -24,7 +24,7 @@ def main():
     # Path to the BM25 index
     index_path_bm = root_dir / "data" / "processed" / "bm25_index.pkl"
     # Path to the SemanticSearch index
-    index_path_sem = root_dir / "data" / "processed" / "semantic_index.pkl"
+    index_path_sem = root_dir / "data" / "processed" / "semantic.index"
 
     if not data_path.exists():
         print(f"Error: Data file not found at {data_path}")
