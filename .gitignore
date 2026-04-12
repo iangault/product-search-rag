@@ -212,3 +212,5 @@ data/raw/*
 
 # Ignore large processed artifact
 data/processed/semantic_index.pkl
+data/processed/bm25_index.pkl
+data/processed/semantic.index

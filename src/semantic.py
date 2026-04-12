@@ -57,7 +57,6 @@ class SemanticSearch:
         Args:
             query (str): Search query from user
             top_k (int, optional): number of top results to return.
-                Defaults to 5.
 
         Returns:
             DataFrame: DF of top matching rows with similarity scores
@@ -70,12 +69,18 @@ class SemanticSearch:
 
         # Normalize the query embedding
         faiss.normalize_L2(query_embedding)
-        # Compares query embedding to all indexed document embedding, returning the score and the row position for most similar doc
+        # Compares query embedding to all indexed document embedding,
+        # returning the score and the row position for most similar doc
+
+        # Safer depending on returned results
+        top_k = min(top_k, self.index.ntotal) 
+
         scores, indices = self.index.search(query_embedding, top_k)
 
         # Create a list for results presentation
         results = [(int(i), float(scores[0][rank]))
-                   for rank, i in enumerate(indices[0])]
+                   for rank, i in enumerate(indices[0])
+                   if i != -1]
 
         return results
 

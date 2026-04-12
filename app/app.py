@@ -61,10 +61,10 @@ if submitted and query:
     st.divider()
 
     if search_mode == "BM25":
-        results = bm25_search.retrieve(query, top_k=30) # grab larger pool of results
+        results = bm25_search.retrieve(query, top_k=100) # grab larger pool of results
 
     else:
-        results = semantic_search.retrieve(query, top_k=30) # grab larger pool of results
+        results = semantic_search.retrieve(query, top_k=100) # grab larger pool of results
 
     seen_titles = set()
     displayed_count = 0

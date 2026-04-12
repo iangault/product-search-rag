@@ -77,10 +77,11 @@ To interact with the information retrieval systems, we developed a simple web ap
 ### Repository Installation
 
 1.  **Installation** After opening a terminal, clone the repository and navigate to the project directory:
-    ```bash
-    git clone https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow.git
-    cd DSCI_575_project_gaultian_chrchow
-    ```
+
+        ```bash
+        git clone https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow.git
+        cd DSCI_575_project_gaultian_chrchow
+        ```
 
 ### Setup Instructions
 
@@ -94,23 +95,23 @@ make help
 
     1. Create or Prune the Conda environment:
 
-    ``` bash
-    make create
-    make prune
-    ```
+        ``` bash
+        make create
+        make prune
+        ```
 
     2. Activate the Conda environment:
 
-    ```bash
-    conda activate 575_proj
-    ```
+        ```bash
+        conda activate 575_proj
+        ```
 
 3.  **Environment Variables** Create an `.env` file in root directory. Note: Do not commit this file to Github!!!
 
-    ``` bash
-    HF_TOKEN=<your_huggingface_token>
-    ANTHROPIC_API_KEY=<your_anthropic_api_key_here>
-    ```
+        ``` bash
+        HF_TOKEN=<your_huggingface_token>
+        ANTHROPIC_API_KEY=<your_anthropic_api_key_here>
+        ```
 
 4. **Data Preparation and Indexing** To reproduce our results:
 
@@ -118,20 +119,24 @@ make help
 
     2.  **Indexing:** run the indexing script in to build BM25 and Semantic search indices:
 
+    Due to the large file sizes, we have added processed indexing data to .gitignore, and so `make build` is an essential step to run the app
+
         ``` bash
         make build
         ```
 
-        Note: Preprocessed indices may already be available in `data/processed/` for immediate use.
+5.  **Running the Web App** Launch the Streamlit dashboard:
 
-        **Remove index data** in `data/processed/`:
+        ```bash
+        make run
+        ```
+
+    Once finished using the app, close the window in the browser, and in terminal press `cntl + c` to stop running the app.
+
+6. **Remove index data** in `data/processed/`:
+
+    If wanting to confirm a clean state of index files, or reduce memory, before closing up the project.
 
         ``` bash
         make clean
         ```
-
-5.  **Running the Web App** Launch the Streamlit dashboard:
-
-    ```bash
-    make run
-    ```
