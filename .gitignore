@@ -214,3 +214,7 @@ data/raw/*
 data/processed/semantic_index.pkl
 data/processed/bm25_index.pkl
 data/processed/semantic.index
+
+# Submission
+Milestone_subission.md
+flow_chart.md

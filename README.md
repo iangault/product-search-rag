@@ -39,14 +39,13 @@ DSCI_575_project_gaultian_chrchow/
 │   │   BM25 retrieval class, including index building, searching, saving, and loading.
 │   ├── semantic.py
 │   │   Semantic retrieval class using SentenceTransformers and FAISS.
-│   ├── normalize.py
-│   │   Helper function(s) to convert mixed column types like strings, lists, and dictionaries into plain text.
-│   ├── build_documents.py
-│   │   Builds one searchable document string per row by combining selected columns.
 │   ├── build_index.py
 │   │   Script to build and save BM25 and semantic search indexes from the processed dataset.
 │   └── utils.py
-│       Text preprocessing utilities used for BM25 tokenization and stemming.
+│       Utility helpers used by retrieval:
+│       - `text_preprocessor`: tokenization, stopword removal, and stemming for BM25
+│       - `normalize`: converts strings, lists, and dicts into plain text
+│       - `build_documents`: combines selected columns into one searchable document per row
 │
 ├── notebooks/
 │   Project notebooks for EDA, preprocessing, and experimentation.

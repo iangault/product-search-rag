@@ -49,6 +49,7 @@ clean:
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		echo -e "$(YELLOW)Cleaning saved indexes...$(RESET)"; \
 		rm -f data/processed/bm25_index.pkl; \
+		rm -f data/processed/semantic_index.pkl; \
 		rm -f data/processed/semantic.index; \
 		echo -e "$(GREEN)Clean complete.$(RESET)"; \
 	else \
