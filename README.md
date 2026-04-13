@@ -85,7 +85,7 @@ To interact with the information retrieval systems, we developed a simple web ap
 
 ### Setup Instructions
 
-**Note**: For a summary of makefile actions:
+ **Note**: For a summary of makefile actions:
 
 ```bash
 make help
@@ -95,7 +95,7 @@ make help
 
     1. Create or Prune the Conda environment:
 
-        ``` bash
+        ```bash
         make create
         make prune
         ```
@@ -106,12 +106,12 @@ make help
         conda activate 575_proj
         ```
 
-3.  **Environment Variables** Create an `.env` file in root directory. Note: Do not commit this file to Github!!!
+3.  **Environment Variables** Create an `.env` file in root directory. Note: Do not commit this file to Github!
 
-        ``` bash
-        HF_TOKEN=<your_huggingface_token>
-        ANTHROPIC_API_KEY=<your_anthropic_api_key_here>
-        ```
+    ```bash
+    HF_TOKEN=<your_huggingface_token>
+    ANTHROPIC_API_KEY=<your_anthropic_api_key_here>
+    ```
 
 4. **Data Preparation and Indexing** To reproduce our results:
 
@@ -119,17 +119,17 @@ make help
 
     2.  **Indexing:** run the indexing script in to build BM25 and Semantic search indices:
 
-    Due to the large file sizes, we have added processed indexing data to .gitignore, and so `make build` is an essential step to run the app
+        Due to the large file sizes, we have added processed indexing data to .gitignore, and so `make build` is an essential step to run the app
 
-        ``` bash
+        ```bash
         make build
         ```
 
 5.  **Running the Web App** Launch the Streamlit dashboard:
 
-        ```bash
-        make run
-        ```
+    ```bash
+    make run
+    ```
 
     Once finished using the app, close the window in the browser, and in terminal press `cntl + c` to stop running the app.
 
@@ -137,6 +137,6 @@ make help
 
     If wanting to confirm a clean state of index files, or reduce memory, before closing up the project.
 
-        ``` bash
-        make clean
-        ```
+    ``` bash
+    make clean
+    ```
