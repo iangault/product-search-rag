@@ -14,6 +14,8 @@ For this project, we are using the Appliances category from the [Amazon Reviews 
 
 ### Retrieval Workflows
 
+Both BM25 and semantic search index the same set of metadata fields: `product_title`, `features`, `description`, `categories`, and `details`, so that comparisons between the two methods reflect differences in retrieval approach rather than differences in different corpuses.
+
 BM25 search was performed using the [`rank_bm25`](https://pypi.org/project/rank-bm25/) package. Both the corpus and user queries are processed and tokenized before results are ranked based on a derivation of the TF-IDF (term frequency - inverse document frequency).
 
 Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from the [`sentence-transformers`](https://huggingface.co/sentence-transformers) to generate document embeddings. These embeddings were then indexed using [FAISS](https://faiss.ai/index.html) (Facebook AI Similarity Search) to enable similarity searches. Cosine similarity was used to calculate vector similarity and results are retrieved using k-nearest neighbours.
