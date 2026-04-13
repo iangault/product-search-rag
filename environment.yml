@@ -4,6 +4,7 @@
 name: 575_proj
 channels:
   - conda-forge
+  - defaults
 dependencies:
   - python=3.11
   - pip
