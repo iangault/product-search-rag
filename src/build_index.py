@@ -10,6 +10,7 @@ if str(root_dir) not in sys.path:
 
 from src.bm25 import BM25Search
 from src.semantic import SemanticSearch
+from src.utils import build_documents
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -36,16 +37,18 @@ def main():
     df = pd.read_parquet(data_path)
 
     # BM25 Save
-    products = df["product_title"].tolist()
+    # Columns as input into both search engines
+    cols = ["product_title", "features", "description", "categories", "details"]
+    bm25_docs = build_documents(df, cols)
     print("\nStarting BM25 Embeddings...\n")
-    engine_bm = BM25Search(products)
+    engine_bm = BM25Search(bm25_docs)
     engine_bm.save(index_path_bm)
 
     # SemanticSearch
     print("\nStarting Semantic Embeddings...\n")
 
     # Columns as input into the semantic search
-    cols = ["product_title", "features", "description", "categories", "details"]
+    #cols = ["product_title", "features", "description", "categories", "details"]
 
     engine_sem = SemanticSearch(df, cols)
     engine_sem.save(index_path_sem)
