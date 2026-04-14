@@ -7,13 +7,14 @@ RED := \033[0;31m
 CYAN := \033[0;36m
 RESET := \033[0m
 
-.PHONY: help create prune build run clean
+.PHONY: help create prune process build run clean
 
 # Help command to list available commands
 help:
 	@echo -e "$(CYAN)Available commands:$(RESET)"
 	@echo -e "  $(YELLOW)make create$(RESET)       - Create conda environment from environment.yml"
 	@echo -e "  $(YELLOW)make prune$(RESET)        - Update conda environment from environment.yml with pruning"
+	@echo -e "  $(YELLOW)make process$(RESET)      - Import raw data, process it, and save parquet files"
 	@echo -e "  $(YELLOW)make build$(RESET)        - Build and save BM25 and semantic indexes"
 	@echo -e "  $(YELLOW)make run$(RESET)          - Run the Streamlit app locally"
 	@echo -e "  $(YELLOW)make clean$(RESET)        - Remove saved index files (requires confirmation)"
@@ -29,6 +30,11 @@ prune:
 	@echo -e "$(CYAN)Updating conda environment from environment.yml with pruning...$(RESET)"
 	@conda env update --file environment.yml --prune
 	@echo -e "$(GREEN)Environment update complete.$(RESET)"
+
+process:
+	@echo -e "$(CYAN)Importing and processing raw data...$(RESET)"
+	@python src/import_processing.py
+	@echo -e "$(GREEN)Processed parquet build complete.$(RESET)"
 
 # Build and save retrieval indexes
 build:
@@ -48,6 +54,7 @@ clean:
 	echo ""; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		echo -e "$(YELLOW)Cleaning saved indexes...$(RESET)"; \
+		rm -f data/processed/processed.parquet; \
 		rm -f data/processed/bm25_index.pkl; \
 		rm -f data/processed/semantic_index.pkl; \
 		rm -f data/processed/semantic.index; \

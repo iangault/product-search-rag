@@ -21,7 +21,7 @@ def main():
     indices and save them to disk.
     """
     # Processed Data
-    data_path = root_dir / "data" / "processed" / "merged.parquet"
+    data_path = root_dir / "data" / "processed" / "processed.parquet"
     # Path to the BM25 index
     index_path_bm = root_dir / "data" / "processed" / "bm25_index.pkl"
     # Path to the SemanticSearch index
@@ -38,7 +38,15 @@ def main():
 
     # BM25 Save
     # Columns as input into both search engines
-    cols = ["product_title", "features", "description", "categories", "details"]
+    cols = ["product_title",
+            "features",
+            "description",
+            "categories",
+            "details",
+            "review_text",
+            # flattened aggregated review title and text
+            ]
+
     bm25_docs = build_documents(df, cols)
     print("\nStarting BM25 Embeddings...\n")
     engine_bm = BM25Search(bm25_docs)
