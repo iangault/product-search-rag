@@ -1,3 +1,5 @@
+# Script to import meta and review datasets and process them to be inputs
+
 from pathlib import Path
 import duckdb
 import requests
@@ -15,6 +17,7 @@ RAW_DIR = ROOT / "data" / "raw"
 
 c2 = duckdb.connect()
 
+# Review Data
 c2.execute(
     f"""
       COPY (SELECT *
@@ -25,6 +28,8 @@ c2.execute(
   """
 )
 
+# Meta data
+# Filter out NaNs for product title
 c2.execute(
     f"""
       COPY (SELECT *
@@ -36,6 +41,8 @@ c2.execute(
       (FORMAT PARQUET, COMPRESSION ZSTD)
   """
 )
+
+##### PROCESSING ######
 
 # Brainstormed with ChatGBT to get a complex
 # SQL function to process the data

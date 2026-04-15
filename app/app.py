@@ -76,6 +76,7 @@ if submitted and query:
         review_title = item_data.get("candidate_review_title")
         review_text = item_data.get("candidate_review_text")
 
+        # Wrangling review title and content
         if pd.notna(review_title) and str(review_title).strip() and pd.notna(review_text) and str(review_text).strip():
             review_display = f"{review_title}: {review_text}"
         elif pd.notna(review_title) and str(review_title).strip():
@@ -90,11 +91,13 @@ if submitted and query:
 
         col1, col2 = st.columns(2)
         with col1:
+            # Average Rating derived from the review dataset (more complete than meta)
             try:
                 avg_rating = float(item_data.get("derived_avg_rating", 0))
             except (ValueError, TypeError):
                 avg_rating = 0.0
 
+            # Number of Reviews
             review_count = item_data.get("n_reviews", 0)
             if pd.isna(review_count):
                 review_count = 0
@@ -105,11 +108,12 @@ if submitted and query:
             else:
                 filled_stars = max(0, min(5, round(avg_rating)))
                 stars = "★" * filled_stars + "☆" * (5 - filled_stars)
-                st.write(f"**Average Rating:** {stars} ({avg_rating:.2f}/5)")
+                st.write(f"**Average Rating:** {stars} ({avg_rating:.1f}/5.0)")
 
             st.write(f"**Review Count:** {review_count}")
 
         with col2:
+            # Review filtered to max helpful votes
             helpful_votes = item_data.get("candidate_review_helpful_vote", 0)
             if pd.isna(helpful_votes):
                 helpful_votes = 0
