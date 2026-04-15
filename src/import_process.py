@@ -17,7 +17,7 @@ c2 = duckdb.connect()
 
 c2.execute(
     f"""
-      COPY (SELECT * FROM read_json_auto('{REVIEWS_URL}')  LIMIT 20000)
+      COPY (SELECT * FROM read_json_auto('{REVIEWS_URL}')  LIMIT 60000)
       TO '{RAW_DIR}/reviews_raw.parquet'
       (FORMAT PARQUET, COMPRESSION ZSTD)
   """
@@ -131,5 +131,3 @@ c2.execute(
     (FORMAT PARQUET, COMPRESSION ZSTD)
     """
 )
-
-
