@@ -43,8 +43,7 @@ def main():
             "description",
             "categories",
             "details",
-            "review_text",
-            # flattened aggregated review title and text
+            "review_text", # flattened aggregated review title and text
             ]
 
     bm25_docs = build_documents(df, cols)

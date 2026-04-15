@@ -116,14 +116,16 @@ c2.execute(
             SELECT
                 parent_asin,
                 review_title AS candidate_review_title,
-                text AS candidate_review_text
+                text AS candidate_review_text,
+                helpful_vote AS candidate_review_helpful_vote
             FROM ranked_reviews
             WHERE rn = 1
         )
         SELECT
             a.*,
             c.candidate_review_title,
-            c.candidate_review_text
+            c.candidate_review_text,
+            c.candidate_review_helpful_vote
         FROM aggregated a
         LEFT JOIN candidate_reviews c USING (parent_asin)
     )

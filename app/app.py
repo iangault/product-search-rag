@@ -5,7 +5,6 @@ import sys
 from pathlib import Path
 import streamlit as st
 import pandas as pd
-import numpy as np
 
 # get proj root dir and add to path so can import from src
 root_dir = Path(__file__).resolve().parent.parent
@@ -18,7 +17,7 @@ from src.semantic import SemanticSearch
 st.title("Amazon Appliances Search 🛒", text_alignment="left")
 
 # Processed Data
-data_path = root_dir / "data" / "processed" / "merged.parquet"
+data_path = root_dir / "data" / "processed" / "processed.parquet"
 # Path to the BM25 index
 index_path_bm = root_dir / "data" / "processed" / "bm25_index.pkl"
 # Path to the SemanticSearch index
@@ -61,49 +60,52 @@ if submitted and query:
     st.divider()
 
     if search_mode == "BM25":
-        results = bm25_search.retrieve(query, top_k=100) # grab larger pool of results
+        results = bm25_search.retrieve(query, top_k=10)
 
     else:
-        results = semantic_search.retrieve(query, top_k=100) # grab larger pool of results
-
-    seen_titles = set()
-    displayed_count = 0
+        results = semantic_search.retrieve(query, top_k=10)
 
     # display results
     for index, score in results:
 
-        # stop at n=10 unique titles
-        if displayed_count >= 10:
-            break
-
         item_data = df.iloc[index].to_dict()
         title = item_data.get("product_title", "Unknown Title")
 
-        # skip if we've already displayed this title
-        if title in seen_titles:
-            continue
-
-        # new title, add it to seen!
-        seen_titles.add(title)
-        displayed_count += 1
-
         st.markdown(f"###### {title}")
 
-        review_text = str(item_data.get("text", "No review text available."))
-        trunc_text = review_text[:200] + "..." if len(review_text) > 200 else review_text
+        review_title = item_data.get("candidate_review_title")
+        review_text = item_data.get("candidate_review_text")
+
+        if pd.notna(review_title) and str(review_title).strip() and pd.notna(review_text) and str(review_text).strip():
+            review_display = f"{review_title}: {review_text}"
+        elif pd.notna(review_title) and str(review_title).strip():
+            review_display = str(review_title)
+        elif pd.notna(review_text) and str(review_text).strip():
+            review_display = str(review_text)
+        else:
+            review_display = "No candidate review available."
+
+        trunc_text = review_display[:200] + "..." if len(review_display) > 200 else review_display
         st.write(f"*{trunc_text}*")
-        
+
         col1, col2 = st.columns(2)
         with col1:
             try:
-                rating_val = int(float(item_data.get("rating", 0)))
+                avg_rating = float(item_data.get("derived_avg_rating", 0))
             except (ValueError, TypeError):
-                rating_val = 0
-            
-            stars = "★" * rating_val + "☆" * (5 - rating_val)
-            st.write(f"**Rating:** {stars}")
-        
+                avg_rating = 0.0
+
+            filled_stars = max(0, min(5, round(avg_rating)))
+            stars = "★" * filled_stars + "☆" * (5 - filled_stars)
+            review_count = item_data.get("n_reviews", 0)
+            st.write(f"**Average Rating:** {stars} ({avg_rating:.2f}/5)")
+            st.write(f"**Review Count:** {review_count}")
+
         with col2:
+            helpful_votes = item_data.get("candidate_review_helpful_vote", 0)
+            if pd.isna(helpful_votes):
+                helpful_votes = 0
+            st.write(f"**Helpful Votes:** {int(helpful_votes)}")
             st.write(f"**Retrieval Score:** {score:.4f}")
 
         st.divider()
