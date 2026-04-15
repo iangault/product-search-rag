@@ -95,10 +95,18 @@ if submitted and query:
             except (ValueError, TypeError):
                 avg_rating = 0.0
 
-            filled_stars = max(0, min(5, round(avg_rating)))
-            stars = "★" * filled_stars + "☆" * (5 - filled_stars)
             review_count = item_data.get("n_reviews", 0)
-            st.write(f"**Average Rating:** {stars} ({avg_rating:.2f}/5)")
+            if pd.isna(review_count):
+                review_count = 0
+            review_count = int(review_count)
+
+            if pd.isna(avg_rating) or review_count == 0:
+                st.write("**Average Rating:** No reviews yet")
+            else:
+                filled_stars = max(0, min(5, round(avg_rating)))
+                stars = "★" * filled_stars + "☆" * (5 - filled_stars)
+                st.write(f"**Average Rating:** {stars} ({avg_rating:.2f}/5)")
+
             st.write(f"**Review Count:** {review_count}")
 
         with col2:

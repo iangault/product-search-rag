@@ -17,7 +17,9 @@ c2 = duckdb.connect()
 
 c2.execute(
     f"""
-      COPY (SELECT * FROM read_json_auto('{REVIEWS_URL}')  LIMIT 60000)
+      COPY (SELECT *
+            FROM read_json_auto('{REVIEWS_URL}') 
+            LIMIT 200000)
       TO '{RAW_DIR}/reviews_raw.parquet'
       (FORMAT PARQUET, COMPRESSION ZSTD)
   """
@@ -25,7 +27,11 @@ c2.execute(
 
 c2.execute(
     f"""
-      COPY (SELECT * FROM read_json_auto('{META_URL}') LIMIT 20000)
+      COPY (SELECT *
+            FROM read_json_auto('{META_URL}')
+            WHERE title IS NOT NULL
+            AND TRIM(title) <> ''
+      LIMIT 20000)
       TO '{RAW_DIR}/meta_raw.parquet'
       (FORMAT PARQUET, COMPRESSION ZSTD)
   """
@@ -45,7 +51,7 @@ c2.execute(
     COPY (
         WITH joined AS (
             SELECT
-                r.parent_asin,
+                m.parent_asin,
                 r.rating,
                 r.helpful_vote,
                 r.title AS review_title,
@@ -66,9 +72,11 @@ c2.execute(
                         THEN r.text
                     ELSE NULL
                 END AS review_doc
-            FROM read_parquet('{RAW_DIR}/reviews_raw.parquet') r
-            LEFT JOIN read_parquet('{RAW_DIR}/meta_raw.parquet') m
+            FROM read_parquet('{RAW_DIR}/meta_raw.parquet') m
+            LEFT JOIN read_parquet('{RAW_DIR}/reviews_raw.parquet') r
                 USING (parent_asin)
+            WHERE m.title IS NOT NULL
+              AND TRIM(m.title) <> ''
         ),
         ranked_reviews AS (
             SELECT
@@ -99,7 +107,7 @@ c2.execute(
                 price,
                 AVG(rating) AS derived_avg_rating,
                 MAX(helpful_vote) AS max_helpful_vote,
-                COUNT(*) AS n_reviews,
+                COUNT(review_doc) AS n_reviews,
                 LIST(review_doc) FILTER (WHERE review_doc IS NOT NULL) AS review_docs,
                 STRING_AGG(review_doc, ' ') FILTER (WHERE review_doc IS NOT NULL) AS review_text
             FROM joined
