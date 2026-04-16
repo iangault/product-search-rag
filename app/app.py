@@ -14,6 +14,13 @@ if str(root_dir) not in sys.path:
 
 from src.bm25 import BM25Search
 from src.semantic import SemanticSearch
+from src.rag_pipeline import (
+    answer_query,
+    get_embeddings,
+    get_llm,
+    get_rag_index_version,
+    load_retriever,
+)
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -43,6 +50,11 @@ def get_search_version() -> tuple[float, float, float]:
         semantic_ids_path.stat().st_mtime,
     )
 
+
+def get_rag_version() -> tuple[float, object]:
+    """Invalidate cached RAG resources when data or saved RAG index changes."""
+    return (data_path.stat().st_mtime, get_rag_index_version())
+
 # cache the data
 @st.cache_data
 def load_data(_version: float):
@@ -58,18 +70,31 @@ def load_search(_version: tuple[float, float, float]):
     semantic = SemanticSearch.load(index_path_sem)
     return bm25, semantic
 
+
+@st.cache_resource
+def load_rag(_version: tuple[float, object]):
+    # Keep loaded RAG resources alive across reruns.
+    retriever = load_retriever(get_embeddings())
+    llm = get_llm()
+    return retriever, llm
+
 # load data
 # Changed to index by parent_asin
 df = load_data(get_data_version())
 df_by_asin = df.set_index("parent_asin", drop=False)
 bm25_search, semantic_search = load_search(get_search_version())
+rag_retriever = None
+rag_llm = None
+
+if get_rag_index_version() is not None:
+    rag_retriever, rag_llm = load_rag(get_rag_version())
 
 st.divider()
 
 # search mode selector - radio buttons
 search_mode = st.radio(
     "Select Search Mode:",
-    ["BM25", "Semantic"],
+    ["BM25", "Semantic", "RAG"],
     horizontal=True,
     key = "search_mode",
 )
@@ -85,7 +110,7 @@ results_placeholder = st.empty()
 
 if submitted and query:
     with results_placeholder.container():
-        st.subheader(f"Top 10 Results for '{query}' using {search_mode} search")
+        st.subheader(f"Top Results for '{query}' using {search_mode} search")
 
         st.divider()
 
@@ -94,9 +119,38 @@ if submitted and query:
         # Was debugged with codex
         if search_mode == "BM25":
             results = bm25_search.retrieve(query, top_k=10)
+            rag_answer = None
+            retrieved_docs = []
+
+        elif search_mode == "Semantic":
+            results = semantic_search.retrieve(query, top_k=10)
+            rag_answer = None
+            retrieved_docs = []
 
         else:
-            results = semantic_search.retrieve(query, top_k=10)
+            if rag_retriever is None or rag_llm is None:
+                st.error("RAG index not found. Run `python src/build_rag.py` or `make build-rag` first.")
+                st.stop()
+
+            rag_answer, retrieved_docs = answer_query(
+                query,
+                retriever=rag_retriever,
+                llm=rag_llm,
+            )
+
+            st.markdown("### Answer")
+            st.markdown(rag_answer)
+            st.divider()
+            st.markdown("### Supporting Sources")
+
+            seen_asins = set()
+            results = []
+            for doc in retrieved_docs:
+                parent_asin = doc.metadata.get("parent_asin")
+                if not parent_asin or parent_asin in seen_asins:
+                    continue
+                seen_asins.add(parent_asin)
+                results.append((parent_asin, None))
 
         # display results
         for parent_asin, score in results:
@@ -153,15 +207,25 @@ if submitted and query:
             # Previously, different cards were not updating with search
             # Has now been fixed
             card_markdown = "\n\n".join(
-                [
+                [line for line in [
                     f"###### {item_data.get('product_title', 'Unknown Title')}",
                     f"*{trunc_text}*",
                     f"**{rating_display}**",
                     f"**Review Count:** {review_count}",
                     f"**{helpful_display}**",
-                    f"**Retrieval Score:** {score:.4f}",
-                ]
+                    f"**Retrieval Score:** {score:.4f}" if score is not None else None,
+                ] if line is not None]
             )
             st.markdown(card_markdown)
+
+            if search_mode == "RAG":
+                matching_doc = next(
+                    (doc for doc in retrieved_docs
+                     if doc.metadata.get("parent_asin") == parent_asin),
+                    None,
+                )
+                if matching_doc is not None:
+                    with st.expander("Show retrieved context"):
+                        st.text(matching_doc.page_content)
 
             st.divider()

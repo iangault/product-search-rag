@@ -7,7 +7,7 @@ RED := \033[0;31m
 CYAN := \033[0;36m
 RESET := \033[0m
 
-.PHONY: help create prune process build run all clean
+.PHONY: help create prune process build build-rag run all clean
 
 # Help command to list available commands
 help:
@@ -15,7 +15,8 @@ help:
 	@echo -e "  $(YELLOW)make create$(RESET)       - Create conda environment from environment.yml"
 	@echo -e "  $(YELLOW)make prune$(RESET)        - Update conda environment from environment.yml with pruning"
 	@echo -e "  $(YELLOW)make process$(RESET)      - Import raw data, process it, and save parquet files"
-	@echo -e "  $(YELLOW)make build$(RESET)        - Build and save BM25 and semantic indexes"
+	@echo -e "  $(YELLOW)make build$(RESET)        - Build and save BM25, semantic, and RAG indexes"
+	@echo -e "  $(YELLOW)make build-rag$(RESET)    - Build and save the RAG index"
 	@echo -e "  $(YELLOW)make run$(RESET)          - Run the Streamlit app locally"
 	@echo -e "  $(YELLOW)make all$(RESET)          - Clean artifacts, process data, build indexes, then run the app"
 	@echo -e "  $(YELLOW)make clean$(RESET)        - Remove processed data and saved retrieval artifacts"
@@ -41,7 +42,14 @@ process:
 build:
 	@echo -e "$(CYAN)Building BM25 and semantic indexes...$(RESET)"
 	@python src/build_index.py
+	@echo -e "$(CYAN)Building RAG index...$(RESET)"
+	@python src/build_rag.py
 	@echo -e "$(GREEN)Index build complete.$(RESET)"
+
+build-rag:
+	@echo -e "$(CYAN)Building RAG index...$(RESET)"
+	@python src/build_rag.py
+	@echo -e "$(GREEN)RAG index build complete.$(RESET)"
 
 # Run the Streamlit app
 run:
@@ -58,4 +66,5 @@ clean:
 	@rm -f data/processed/bm25_index.pkl
 	@rm -f data/processed/semantic.ids.npy
 	@rm -f data/processed/semantic.index
+	@rm -rf data/processed/rag_faiss
 	@echo -e "$(GREEN)Clean complete.$(RESET)"

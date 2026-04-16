@@ -1,0 +1,28 @@
+import sys
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+root_dir = Path(__file__).resolve().parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.append(str(root_dir))
+
+from src.rag_pipeline import build_and_save_retriever, data_path, get_embeddings, rag_index_dir
+
+load_dotenv()
+
+
+def main():
+    """Build and persist the RAG retriever artifacts for app use."""
+    if not data_path.exists():
+        print(f"Error: Data file not found at {data_path}")
+        print("Please run src/import_process.py first.")
+        return
+
+    print("Building RAG retriever...")
+    build_and_save_retriever(get_embeddings())
+    print(f"Saved RAG retriever to {rag_index_dir}")
+
+
+if __name__ == "__main__":
+    main()

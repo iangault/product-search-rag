@@ -8,6 +8,7 @@ import sys
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_groq import ChatGroq
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
 from dotenv import load_dotenv
@@ -21,11 +22,11 @@ if str(root_dir) not in sys.path:
     sys.path.append(str(root_dir))
 
 from src.utils import build_documents
+from src.prompts import build_prompt
 
 # Processed Data
 data_path = root_dir / "data" / "processed" / "processed.parquet"
-# Path to the SemanticSearch index
-index_path_sem = root_dir / "data" / "processed" / "semantic.index"
+rag_index_dir = root_dir / "data" / "processed" / "rag_faiss"
 
 cols = ["product_title",
         "features",
@@ -43,11 +44,12 @@ def get_llm():
         max_tokens=100,
     )
 
-### Text Splitter ###
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap =100
-)
+
+def get_embeddings():
+    """Create the embedding model used to build the FAISS retriever."""
+    return HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
 ### Functions ###
 def load_chunked():
@@ -76,6 +78,11 @@ def load_chunked():
         )
 
     # Split the document for better LLM performance
+    ### Text Splitter ###
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap =100)
+    
     split_docs = text_splitter.split_documents(document)
     return split_docs
 
@@ -84,6 +91,54 @@ def build_retriever(embeddings):
 
     split_docs = load_chunked()
     vectorstore = FAISS.from_documents(split_docs, embeddings)
+    return vectorstore.as_retriever(search_kwargs={"k": 5})
+
+
+def build_vectorstore(embeddings):
+    """Build the FAISS vectorstore over chunked documents."""
+    split_docs = load_chunked()
+    return FAISS.from_documents(split_docs, embeddings)
+
+
+def get_rag_index_version():
+    """Return a version token that changes when the saved RAG index changes."""
+    index_file = rag_index_dir / "index.faiss"
+    pickle_file = rag_index_dir / "index.pkl"
+    if not index_file.exists() or not pickle_file.exists():
+        return None
+    return (index_file.stat().st_mtime, pickle_file.stat().st_mtime)
+
+
+def save_vectorstore(vectorstore):
+    """Persist the FAISS vectorstore to disk."""
+    rag_index_dir.mkdir(parents=True, exist_ok=True)
+    vectorstore.save_local(str(rag_index_dir))
+
+
+def build_and_save_retriever(embeddings):
+    """Build the RAG vectorstore and save it for later app use."""
+    vectorstore = build_vectorstore(embeddings)
+    save_vectorstore(vectorstore)
+    return vectorstore.as_retriever(search_kwargs={"k": 5})
+
+
+def load_retriever(embeddings):
+    """Load the persisted FAISS retriever from disk."""
+    index_file = rag_index_dir / "index.faiss"
+    pickle_file = rag_index_dir / "index.pkl"
+
+    if not index_file.exists() or not pickle_file.exists():
+        raise FileNotFoundError(
+            f"RAG index not found in {rag_index_dir}. "
+            "Run src/build_rag.py first."
+        )
+
+    vectorstore = FAISS.load_local(
+        str(rag_index_dir),
+        embeddings,
+        allow_dangerous_deserialization=True,
+    )
+
     return vectorstore.as_retriever(search_kwargs={"k": 5})
 
 
@@ -103,3 +158,19 @@ def relevant_text(retreived_docs):
         )
 
     return "\n\n".join(blocks)
+
+
+def answer_query(query, retriever=None, llm=None):
+    """Run retrieval, build the prompt, and return the model answer."""
+    if retriever is None:
+        retriever = build_retriever(get_embeddings())
+
+    if llm is None:
+        llm = get_llm()
+
+    retrieved_docs = retriever.invoke(query)
+    context = relevant_text(retrieved_docs)
+    prompt = build_prompt(query, context)
+    response = llm.invoke(prompt)
+
+    return response.content, retrieved_docs
