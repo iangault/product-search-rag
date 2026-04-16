@@ -1,10 +1,12 @@
+from pathlib import Path
 import faiss
+import numpy as np
 from sentence_transformers import SentenceTransformer
-from src.utils import normalize
 from src.utils import build_documents
 
 # NOTE: Brainstorming with ChatGBT5 was done to develop the class
 # and learn about new packages
+# Debugged with codex to index based on `parent_asin`
 
 class SemanticSearch:
     """Search engine class that performs semantic retrieval
@@ -12,20 +14,20 @@ class SemanticSearch:
     """
 
     def __init__(self, df, columns):
-        """Initializes the semantic search engine.
-        - builds document strings
-        - generates embeddings
-        - creates a FAISS index
+        """Initialize the semantic search engine.
 
-        Args:
-            df (DataFrame): 
-                Input with source text fields
-            columns (str or list of str or dict):
-                columnnames to combine into one searchable 
-                document per row
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            Processed product dataframe containing one row per product,
+            including `parent_asin`.
+        columns : str or list of str
+            Column name(s) to combine into one searchable document per
+            row.
         """
 
         self.df = df.reset_index(drop=True)
+        self.ids = self.df["parent_asin"].tolist()
 
         # If only one columns as a string is passed
         self.columns = [columns] if isinstance(columns, str) else columns
@@ -51,16 +53,20 @@ class SemanticSearch:
         self.index.add(self.embeddings)
 
     def retrieve(self, query, top_k):
-        """Retrieve top k rows whose document embeddings are most
-        similar to the query embedding
+        """Retrieve the top semantic matches for a query.
 
-        Args:
-            query (str): Search query from user
-            top_k (int, optional): number of top results to return.
+        Parameters
+        ----------
+        query : str
+            Search query from the user.
+        top_k : int
+            Number of top results to return.
 
-        Returns:
-            DataFrame: DF of top matching rows with similarity scores
-            and a combined document of text.
+        Returns
+        -------
+        list of tuple
+            List of `(product_id, score)` tuples ordered by decreasing
+            similarity.
         """
 
         # Create query embeddings
@@ -78,62 +84,52 @@ class SemanticSearch:
         scores, indices = self.index.search(query_embedding, top_k)
 
         # Create a list for results presentation
-        results = [(int(i), float(scores[0][rank]))
+        results = [(self.ids[int(i)], float(scores[0][rank]))
                    for rank, i in enumerate(indices[0])
                    if i != -1]
 
         return results
 
-    def save(self, filepath="data/processed/semantic.index"):
-        """Save the FAISS structure of ducment embeddings of corpus,
-        so that it can later be compared to query embeddings.
+    @staticmethod
+    def ids_path(filepath):
+        """Return the sidecar file that stores stable document ids."""
+        return filepath.with_suffix(".ids.npy")
 
-        Args:
-            index_path (str, optional): location of index. Defaults to
-            "data/processed/semantic.index".
-            docs_path (str, optional): location of docs. Defaults to
-            "data/processed/semantic_docs.pkl".
+    def save(self, filepath="data/processed/semantic.index"):
+        """Save the semantic index and aligned product ids to disk.
+
+        Parameters
+        ----------
+        filepath : str or Path, optional
+            Path where the FAISS index will be saved. A sidecar
+            `.ids.npy` file containing aligned product ids is written
+            alongside it.
         """
 
-        #### Separate option, will keep here#
-        # index_path="data/processed/semantic.index",
-        # docs_path = "data/processed/semantic_docs.pkl"
-        # # Saves the searchable vector index (vectors and positions)
-        # faiss.write_index(self.index, str(index_path))
-        # # Saves the original built document text for readable results
-        # with open(docs_path, "wb") as f:
-        #     pickle.dump(self.documents, f)
+        filepath = Path(filepath)
 
-        # Saves the searchable vector index (vectors and positions)
+        # Save the searchable vector index itself, then persist a sidecar
+        # array that maps FAISS row positions back to stable product ids.
         faiss.write_index(self.index, str(filepath))
+        np.save(self.ids_path(filepath), np.asarray(self.ids, dtype=str))
 
     @staticmethod
     def load(filepath="data/processed/semantic.index"):
-        """Load a previously saved FAISS index and document string.
+        """Load a saved semantic index and aligned product ids.
 
-        Args:
-            index_path (str, optional): location of index.
-                Defaults to "data/processed/semantic.index".
-            docs_path (str, optional): location of docs.
-                Defaults to "data/processed/semantic_docs.pkl".
+        Parameters
+        ----------
+        filepath : str or Path, optional
+            Path to the saved FAISS index.
 
-        Returns:
-            SemanticSearch: A SemanticSearch object with
-            saved index and documents
+        Returns
+        -------
+        SemanticSearch
+            Semantic search engine with the saved FAISS index, loaded
+            product ids, and query encoder.
         """
 
-        # Option of keeping separate
-        # index_path = "data/processed/semantic.index",
-        # docs_path = "data/processed/semantic_docs.pkl"
-        # # Create empty object to add out engine to
-        # engine = SemanticSearch.__new__(SemanticSearch)
-        # # Create columns attribute
-        # engine.df = None
-        # engine.columns = None
-        # # SentenceTransformer initialized for new queries
-        # engine.model = SentenceTransformer("all-MiniLM-L6-v2")
-        # Read in searchable vector index
-        # engine.index = faiss.read_index(str(index_path))
+        filepath = Path(filepath)
 
         # Create empty object to add out engine to
         engine = SemanticSearch.__new__(SemanticSearch)
@@ -143,5 +139,14 @@ class SemanticSearch:
 
         # Read in searchable vector index
         engine.index = faiss.read_index(str(filepath))
+
+        ids_path = SemanticSearch.ids_path(filepath)
+        if not ids_path.exists():
+            raise FileNotFoundError(
+                f"Semantic id mapping not found at {ids_path}. "
+                "Rebuild the semantic index to regenerate both files."
+            )
+
+        engine.ids = np.load(ids_path, allow_pickle=False).tolist()
 
         return engine

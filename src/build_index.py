@@ -29,11 +29,11 @@ def main():
 
     if not data_path.exists():
         print(f"Error: Data file not found at {data_path}")
-        print("Please run EDA notebook first.")
+        print("Please run src/import_process.py first.")
         return
 
     # load data
-    print("\nLoading parquet...\n")
+    print("Loading parquet...")
     df = pd.read_parquet(data_path)
 
     # BM25 Save
@@ -47,15 +47,13 @@ def main():
             ]
 
     bm25_docs = build_documents(df, cols)
-    print("\nStarting BM25 Embeddings...\n")
-    engine_bm = BM25Search(bm25_docs)
+    doc_ids = df["parent_asin"].tolist()
+    print("Building BM25 index...")
+    engine_bm = BM25Search(bm25_docs, ids=doc_ids)
     engine_bm.save(index_path_bm)
 
     # SemanticSearch
-    print("\nStarting Semantic Embeddings...\n")
-
-    # Columns as input into the semantic search
-    #cols = ["product_title", "features", "description", "categories", "details"]
+    print("Building semantic index...")
 
     engine_sem = SemanticSearch(df, cols)
     engine_sem.save(index_path_sem)

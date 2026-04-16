@@ -215,3 +215,5 @@ data/processed/semantic_index.pkl
 data/processed/bm25_index.pkl
 data/processed/semantic.index
 data/processed/processed.parquet
+data/processed/semantic.ids.npy
+
