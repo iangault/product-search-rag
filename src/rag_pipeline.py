@@ -5,6 +5,11 @@ import pandas as pd
 
 from src.semantic import SemanticSearch
 from src.prompts import build_prompt
+from src.utils import build_documents
+
+from langchain_core.documents import Document
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 root_dir = Path(__file__).resolve().parent.parent
 if str(root_dir) not in sys.path:
@@ -23,3 +28,20 @@ cols = ["product_title",
         "review_text", # flattened aggregated review title and text
         ]
 
+### Generator ###
+
+
+### Text Splitter ###
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap =100
+)
+
+### Functions ###
+def load_chunked_doc():
+    """Load in parquet file and semantic embeddings"""
+    df = pd.read_parquet(data_path).reset_index(drop=True)
+
+
+    retriever = SemanticSearch.load(index_path_sem)
+    return by_asin, retriever
