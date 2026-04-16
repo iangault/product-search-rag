@@ -6,7 +6,7 @@ GitHub Repository: [UBC-MDS/DSCI_575_project_gaultian_chrchow](https://github.co
 
 ### Project Goal
 
-This project aims to build a context-aware product search assistant using the Amazon Reviews 2023 dataset with BM25 keyword and semantic vector searches. Future milestones will incorporate the use of LLMs in the search assistant.
+This project builds a context-aware product search assistant using the Amazon Reviews 2023 dataset. The app supports BM25 keyword search, semantic vector search, and a retrieval-augmented generation (RAG) workflow for grounded question answering over product metadata and review text.
 
 ### Dataset Description
 
@@ -22,13 +22,13 @@ Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from
 
 ### Repository Structure
 
-BM25 and SemanticSearch are defined in their own scripts, but as called in `build_index.py`
+BM25, semantic retrieval, and RAG components are defined in `src/` and built through separate indexing scripts.
 
 ```text
 DSCI_575_project_gaultian_chrchow/
 ├── app/
 │   └── app.py
-│      Streamlit application for running BM25 and semantic product search.
+│      Streamlit application for BM25, semantic, and RAG-based product search.
 │
 ├── data/
 │   ├── raw/
@@ -43,6 +43,12 @@ DSCI_575_project_gaultian_chrchow/
 │   │   Semantic retrieval class using SentenceTransformers and FAISS.
 │   ├── build_index.py
 │   │   Script to build and save BM25 and semantic search indexes from the processed dataset.
+│   ├── rag_pipeline.py
+│   │   RAG retrieval, prompt-building, and answer-generation helpers.
+│   ├── build_rag.py
+│   │   Script to build and save the FAISS index used by the RAG pipeline.
+│   ├── prompts.py
+│   │   Prompt template helpers for the RAG answer generation step.
 │   └── utils.py
 │       Utility helpers used by retrieval:
 │       - `text_preprocessor`: tokenization, stopword removal, and stemming for BM25
@@ -69,11 +75,13 @@ DSCI_575_project_gaultian_chrchow/
 
 To interact with the information retrieval systems, we developed a simple web app using Streamlit. Features include:
 
-* Search Mode Selection: Users can toggle between BM25 and Semantic search methods to compare results
+* Search Mode Selection: Users can toggle between BM25, Semantic, and RAG search modes
 
 * User Query Input: A natural language text box for querying
 
-* Detailed Search Results: For each retrieved product, the app will display the product title, a truncated review, the star rating and the retrieval score (BM25 or Semantic)
+* Detailed Search Results: For each retrieved product, the app displays the product title, a truncated review, the star rating, and the retrieval score for BM25 or Semantic search
+
+* RAG Answer Panel: In RAG mode, the app generates a grounded answer and shows supporting product cards plus the retrieved chunk text used as evidence
 
 ### Repository Installation
 
@@ -110,8 +118,7 @@ make help
 3.  **Environment Variables** Create an `.env` file in root directory. Note: Do not commit this file to Github!
 
     ```bash
-    HF_TOKEN=<your_huggingface_token>
-    ANTHROPIC_API_KEY=<your_anthropic_api_key_here>
+    GROQ_API_KEY=<your_groq_api_key>
     ```
 
 4. **Data Preparation and Indexing** To reproduce our results:
@@ -132,14 +139,24 @@ make help
         1. Run all cells in `notebooks/milestone1_exploration.ipynb` to process raw data into `data/processed/merged.parquet`. (Part of Milestone 1)
         2. Run all cells in `notebooks/milestone2_exploration.ipynb` to explore `data/processed/processed.parquet` and confirm pre-processing steps taken in `import_process.py`. (Improvements made in Milestone 2)
 
-    3.  **Indexing:** run the indexing script to build BM25 and Semantic search indices:
+    3.  **Build IR indexes:** run the indexing script to build BM25 and Semantic search indices:
 
         Derived from `data/processed/processed.parquet`.
 
-        Due to the large file sizes, we have added processed indexing data and processed data to .gitignore, and so `make build` is an essential step to run the app
+        Due to the large file sizes, processed indexing artifacts are ignored by git, so `make build-ir` is an essential step to run BM25 and Semantic search in the app.
 
         ```bash
-        make build
+        make build-ir
+        ```
+
+    4.  **Build RAG index:** run the RAG indexing script to build the persisted FAISS chunk index used by the RAG mode:
+
+        Also derived from `data/processed/processed.parquet`.
+
+        `make build-rag` is required before using RAG mode in the app.
+
+        ```bash
+        make build-rag
         ```
 
 5.  **Running the Web App** Launch the Streamlit dashboard:
@@ -158,7 +175,7 @@ make help
     make clean
     ```
 
-To run the full pipeline of `make clean`, `make process`, `make build`, and `make run`:
+To run the full pipeline of `make clean`, `make process`, `make build-ir`, `make build-rag`, and `make run`:
 
 ``` bash
 make all
