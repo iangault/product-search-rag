@@ -137,9 +137,6 @@ c2.execute(
                 price,
                 -- Average rating across real review rows only.
                 AVG(rating) FILTER (WHERE has_review = 1 AND rating IS NOT NULL) AS derived_avg_rating,
-                -- Preserve the strongest helpful-vote signal seen
-                -- for the product.
-                MAX(helpful_vote) FILTER (WHERE has_review = 1) AS max_helpful_vote,
                 -- Count only rows that passed the `has_review`
                 -- screen above.
                 COUNT(*) FILTER (WHERE has_review = 1) AS n_reviews,
