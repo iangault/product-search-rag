@@ -157,3 +157,9 @@ make help
     ``` bash
     make clean
     ```
+
+To run the full pipeline of `make clean`, `make process`, `make build`, and `make run`:
+
+``` bash
+make all
+```
