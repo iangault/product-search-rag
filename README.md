@@ -116,11 +116,27 @@ make help
 
 4. **Data Preparation and Indexing** To reproduce our results:
 
-    1.  **EDA** run all cells in `notebooks/milestone1_exploration.ipynb` to process raw data into `data/processed/merged.parquet`.
+    1. **Import and Pre-Processing** . Note: Do not commit this file to Github!
 
-    2.  **Indexing:** run the indexing script in to build BM25 and Semantic search indices:
+        1. Import the the raw meta data and review data from <https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw>
+        2. Merge datasets
+        3. Pre-processing of text data
+        4. Save as `processed.parquet`
 
-        Due to the large file sizes, we have added processed indexing data to .gitignore, and so `make build` is an essential step to run the app
+        ```bash
+        make process
+        ```
+
+    2. **EDA** Option step. Internal data exploration to inform analysis
+
+        1. Run all cells in `notebooks/milestone1_exploration.ipynb` to process raw data into `data/processed/merged.parquet`. (Part of Milestone 1)
+        2. Run all cells in `notebooks/milestone2_exploration.ipynb` to explore `data/processed/processed.parquet` and confirm pre-processing steps taken in `import_process.py`. (Improvements made in Milestone 2)
+
+    3.  **Indexing:** run the indexing script to build BM25 and Semantic search indices:
+
+        Derived from `data/processed/processed.parquet`.
+
+        Due to the large file sizes, we have added processed indexing data and processed data to .gitignore, and so `make build` is an essential step to run the app
 
         ```bash
         make build
