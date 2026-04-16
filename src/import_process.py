@@ -78,7 +78,15 @@ c2.execute(
                     WHEN r.text IS NOT NULL AND TRIM(r.text) <> ''
                         THEN r.text
                     ELSE NULL
-                END AS review_doc
+                END AS review_doc,
+                CASE
+                    WHEN r.rating IS NOT NULL
+                      OR r.helpful_vote IS NOT NULL
+                      OR (r.title IS NOT NULL AND TRIM(r.title) <> '')
+                      OR (r.text IS NOT NULL AND TRIM(r.text) <> '')
+                    THEN 1
+                    ELSE 0
+                END AS has_review
             FROM read_parquet('{RAW_DIR}/meta_raw.parquet') m
             LEFT JOIN read_parquet('{RAW_DIR}/reviews_raw.parquet') r
                 USING (parent_asin)
@@ -112,9 +120,9 @@ c2.execute(
                 categories,
                 details,
                 price,
-                AVG(rating) AS derived_avg_rating,
-                MAX(helpful_vote) AS max_helpful_vote,
-                COUNT(review_doc) AS n_reviews,
+                AVG(rating) FILTER (WHERE has_review = 1 AND rating IS NOT NULL) AS derived_avg_rating,
+                MAX(helpful_vote) FILTER (WHERE has_review = 1) AS max_helpful_vote,
+                COUNT(*) FILTER (WHERE has_review = 1) AS n_reviews,
                 LIST(review_doc) FILTER (WHERE review_doc IS NOT NULL) AS review_docs,
                 STRING_AGG(review_doc, ' ') FILTER (WHERE review_doc IS NOT NULL) AS review_text
             FROM joined

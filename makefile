@@ -33,7 +33,7 @@ prune:
 
 process:
 	@echo -e "$(CYAN)Importing and processing raw data...$(RESET)"
-	@python src/import_processing.py
+	@python src/import_process.py
 	@echo -e "$(GREEN)Processed parquet build complete.$(RESET)"
 
 # Build and save retrieval indexes

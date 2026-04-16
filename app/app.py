@@ -93,9 +93,9 @@ if submitted and query:
         with col1:
             # Average Rating derived from the review dataset (more complete than meta)
             try:
-                avg_rating = float(item_data.get("derived_avg_rating", 0))
+                avg_rating = float(item_data.get("derived_avg_rating"))
             except (ValueError, TypeError):
-                avg_rating = 0.0
+                avg_rating = float("nan")
 
             # Number of Reviews
             review_count = item_data.get("n_reviews", 0)
@@ -104,7 +104,7 @@ if submitted and query:
             review_count = int(review_count)
 
             if pd.isna(avg_rating) or review_count == 0:
-                st.write("**Average Rating:** No reviews yet")
+                st.write("**Average Rating:** N/A")
             else:
                 filled_stars = max(0, min(5, round(avg_rating)))
                 stars = "★" * filled_stars + "☆" * (5 - filled_stars)
@@ -114,10 +114,11 @@ if submitted and query:
 
         with col2:
             # Review filtered to max helpful votes
-            helpful_votes = item_data.get("candidate_review_helpful_vote", 0)
-            if pd.isna(helpful_votes):
-                helpful_votes = 0
-            st.write(f"**Helpful Votes:** {int(helpful_votes)}")
+            helpful_votes = item_data.get("candidate_review_helpful_vote")
+            if review_count == 0 or pd.isna(helpful_votes):
+                st.write("**Helpful Votes:** N/A")
+            else:
+                st.write(f"**Helpful Votes:** {int(helpful_votes)}")
             st.write(f"**Retrieval Score:** {score:.4f}")
 
         st.divider()
