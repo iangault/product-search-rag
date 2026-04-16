@@ -57,6 +57,8 @@ c2.execute(
     f"""
     COPY (
         WITH joined AS (
+            -- Join product metadata to raw review rows and
+            -- normalize review text.
             SELECT
                 m.parent_asin,
                 r.rating,
@@ -69,6 +71,10 @@ c2.execute(
                 m.categories,
                 m.details,
                 m.price,
+                -- `review_doc`: combine title/text into
+                -- one displayable review string.
+                -- Prefer "title: text" when both exist, otherwise
+                -- fall back to whichever field is populated.
                 CASE
                     WHEN r.title IS NOT NULL AND TRIM(r.title) <> ''
                          AND r.text IS NOT NULL AND TRIM(r.text) <> ''
@@ -79,6 +85,10 @@ c2.execute(
                         THEN r.text
                     ELSE NULL
                 END AS review_doc,
+                -- `has_review`: mark rows with any review
+                -- signal as real reviews.
+                -- This keeps metadata-only left-join rows from
+                -- being counted as actual reviews downstream.
                 CASE
                     WHEN r.rating IS NOT NULL
                       OR r.helpful_vote IS NOT NULL
@@ -94,11 +104,16 @@ c2.execute(
               AND TRIM(m.title) <> ''
         ),
         ranked_reviews AS (
+            -- Prefer reviews with visible text/title,
+            -- then break ties by helpfulness and length.
             SELECT
                 *,
                 ROW_NUMBER() OVER (
                     PARTITION BY parent_asin
                     ORDER BY
+                        -- First prioritize rows with any readable
+                        -- title/text, then use helpful votes and
+                        -- longer content as tie-breakers.
                         CASE
                             WHEN (review_title IS NOT NULL AND TRIM(review_title) <> '')
                               OR (text IS NOT NULL AND TRIM(text) <> '')
@@ -112,6 +127,8 @@ c2.execute(
             FROM joined
         ),
         aggregated AS (
+            -- Collapse review rows to one product row
+            -- with product-level aggregates.
             SELECT
                 parent_asin,
                 product_title,
@@ -120,9 +137,16 @@ c2.execute(
                 categories,
                 details,
                 price,
+                -- Average rating across real review rows only.
                 AVG(rating) FILTER (WHERE has_review = 1 AND rating IS NOT NULL) AS derived_avg_rating,
+                -- Preserve the strongest helpful-vote signal seen
+                -- for the product.
                 MAX(helpful_vote) FILTER (WHERE has_review = 1) AS max_helpful_vote,
+                -- Count only rows that passed the `has_review`
+                -- screen above.
                 COUNT(*) FILTER (WHERE has_review = 1) AS n_reviews,
+                -- Keep both a list form and one concatenated string
+                -- for downstream retrieval and UI use.
                 LIST(review_doc) FILTER (WHERE review_doc IS NOT NULL) AS review_docs,
                 STRING_AGG(review_doc, ' ') FILTER (WHERE review_doc IS NOT NULL) AS review_text
             FROM joined
@@ -136,6 +160,8 @@ c2.execute(
                 price
         ),
         candidate_reviews AS (
+            -- Keep one representative review per product
+            -- for app display.
             SELECT
                 parent_asin,
                 review_title AS candidate_review_title,
