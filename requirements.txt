@@ -21,7 +21,9 @@ faiss-cpu==1.13.2
 # LLM / RAG
 langchain
 langchain-community
+langchain-huggingface
 langchain-openai
+langchain-groq
 tavily-python
 duckduckgo-search
 
