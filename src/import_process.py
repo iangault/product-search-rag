@@ -87,8 +87,6 @@ c2.execute(
                 END AS review_doc,
                 -- `has_review`: mark rows with any review
                 -- signal as real reviews.
-                -- This keeps metadata-only left-join rows from
-                -- being counted as actual reviews downstream.
                 CASE
                     WHEN r.rating IS NOT NULL
                       OR r.helpful_vote IS NOT NULL
@@ -145,9 +143,8 @@ c2.execute(
                 -- Count only rows that passed the `has_review`
                 -- screen above.
                 COUNT(*) FILTER (WHERE has_review = 1) AS n_reviews,
-                -- Keep both a list form and one concatenated string
+                -- Flatten review snippets into one searchable field
                 -- for downstream retrieval and UI use.
-                LIST(review_doc) FILTER (WHERE review_doc IS NOT NULL) AS review_docs,
                 STRING_AGG(review_doc, ' ') FILTER (WHERE review_doc IS NOT NULL) AS review_text
             FROM joined
             GROUP BY
