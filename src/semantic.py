@@ -149,4 +149,11 @@ class SemanticSearch:
 
         engine.ids = np.load(ids_path, allow_pickle=False).tolist()
 
+        if len(engine.ids) != engine.index.ntotal:
+            raise ValueError(
+                "Semantic index/id mapping mismatch: "
+                f"loaded {len(engine.ids)} ids for {engine.index.ntotal} vectors. "
+                "Rebuild the semantic index so both artifacts are aligned."
+            )
+
         return engine

@@ -130,6 +130,8 @@ make help
         3. Pre-processing of text data
         4. Save as `processed.parquet`
 
+        To balance processing time with meaningful information retrievals, we chose to load 20k metadata products and 200k reviews.
+
         ```bash
         make process
         ```

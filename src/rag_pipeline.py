@@ -1,8 +1,9 @@
-# RAG pipeline setup
+# RAG pipeline
+# NOTE: codex was used for brainstorming, debugging,
+# and making code more efficient
 
 from pathlib import Path
 import pandas as pd
-import os
 import sys
 
 from langchain_core.documents import Document
@@ -13,9 +14,6 @@ from langchain_community.vectorstores import FAISS
 
 from dotenv import load_dotenv
 load_dotenv()
-
-# HF_TOKEN = os.getenv("HF_TOKEN")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 root_dir = Path(__file__).resolve().parent.parent
 if str(root_dir) not in sys.path:
@@ -28,13 +26,19 @@ from src.prompts import build_prompt
 data_path = root_dir / "data" / "processed" / "processed.parquet"
 rag_index_dir = root_dir / "data" / "processed" / "rag_faiss"
 
-cols = ["product_title",
-        "features",
-        "description",
-        "categories",
-        "details",
-        "review_text", # flattened aggregated review title and text
-        ]
+# Columns to be made into a document
+cols = [
+    "product_title",
+    "features",
+    "description",
+    "categories",
+    "details",
+    # flattened aggregated review title and text
+    "review_text",
+]
+
+# Number of documents to be returned
+RETRIEVER_K = 5
 
 def get_llm():
     """Create the Groq client lazily so module import does not require API access."""
@@ -44,14 +48,16 @@ def get_llm():
         max_tokens=100,
     )
 
-
+# Need to call model again because we are rerunning the embedding with chunking
 def get_embeddings():
     """Create the embedding model used to build the FAISS retriever."""
     return HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
-### Functions ###
+# Chunk document into smaller pieces
+# Documents are large based on milestone2_exploration.ipynb
+# Better to feed into the LLM
 def load_chunked():
     """Load in parquet file and returns chunked documents"""
     df = pd.read_parquet(data_path).reset_index(drop=True)
@@ -86,18 +92,23 @@ def load_chunked():
     split_docs = text_splitter.split_documents(document)
     return split_docs
 
-def build_retriever(embeddings):
-    """Buils a FAISS semantic retriever over the split docs"""
-
-    split_docs = load_chunked()
-    vectorstore = FAISS.from_documents(split_docs, embeddings)
-    return vectorstore.as_retriever(search_kwargs={"k": 5})
-
-
+# Store embedding for the chunks
+# Embedding allows us to search for semantically similar
+# Documents to queries
 def build_vectorstore(embeddings):
     """Build the FAISS vectorstore over chunked documents."""
     split_docs = load_chunked()
     return FAISS.from_documents(split_docs, embeddings)
+
+# Vectorstore already built
+# Turns the vectorstore into an object callable with a quiery
+# Search interface
+def as_retriever(vectorstore):
+    """Return the standard retriever config used across the RAG pipeline."""
+    return vectorstore.as_retriever(
+        search_type="similarity",
+        search_kwargs={"k": RETRIEVER_K},
+    )
 
 
 def get_rag_index_version():
@@ -110,20 +121,13 @@ def get_rag_index_version():
 
 
 def save_vectorstore(vectorstore):
-    """Persist the FAISS vectorstore to disk."""
+    """Save the FAISS vectorstore."""
     rag_index_dir.mkdir(parents=True, exist_ok=True)
     vectorstore.save_local(str(rag_index_dir))
 
 
-def build_and_save_retriever(embeddings):
-    """Build the RAG vectorstore and save it for later app use."""
-    vectorstore = build_vectorstore(embeddings)
-    save_vectorstore(vectorstore)
-    return vectorstore.as_retriever(search_kwargs={"k": 5})
-
-
 def load_retriever(embeddings):
-    """Load the persisted FAISS retriever from disk."""
+    """Load the saved FAISS retriever from disk."""
     index_file = rag_index_dir / "index.faiss"
     pickle_file = rag_index_dir / "index.pkl"
 
@@ -136,12 +140,14 @@ def load_retriever(embeddings):
     vectorstore = FAISS.load_local(
         str(rag_index_dir),
         embeddings,
+        # unpickling, but know source
         allow_dangerous_deserialization=True,
     )
 
-    return vectorstore.as_retriever(search_kwargs={"k": 5})
+    return as_retriever(vectorstore)
 
 
+# Context builder
 def relevant_text(retreived_docs):
     """Formats retreived docs to pass to LLM prompt"""
 
@@ -163,7 +169,7 @@ def relevant_text(retreived_docs):
 def answer_query(query, retriever=None, llm=None):
     """Run retrieval, build the prompt, and return the model answer."""
     if retriever is None:
-        retriever = build_retriever(get_embeddings())
+        raise ValueError("`retriever` is required. Load it with `load_retriever()` first.")
 
     if llm is None:
         llm = get_llm()
