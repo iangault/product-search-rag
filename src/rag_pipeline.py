@@ -38,9 +38,34 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 
 ### Functions ###
-def load_chunked_doc():
+def load_chunked():
     """Load in parquet file and semantic embeddings"""
     df = pd.read_parquet(data_path).reset_index(drop=True)
+    # Rebuild documents, but with chunkings, now that
+    # there is an LLM in the pipeline
+    sem_docs = build_documents(df, cols)
+
+    # Change list of strings to LangChanin Document
+    document = []
+    for i, text in enumerate(sem_docs):
+        row = df.iloc[i]
+        document.append(
+            Document(
+                page_content=text,
+                metadata={
+                    "parent_asin": row["parent_asin"],
+                    "product_title": row.get("product_title", "")
+                }
+            )
+        )
+    
+    # Split the document for better LLM performance
+    split_docs = text_splitter.split_documents(document)
+    return split_docs
+
+
+
+
 
 
     retriever = SemanticSearch.load(index_path_sem)
