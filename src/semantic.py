@@ -208,7 +208,7 @@ def encode_documents(model, documents):
             documents[start:end],
             batch_size=SEMANTIC_BATCH_SIZE,
             convert_to_numpy=True,
-            show_progress_bar=False,
+            show_progress_bar=True,
         )
         chunk_embeddings = np.asarray(chunk_embeddings, dtype="float32")
         chunk_embeddings = np.ascontiguousarray(chunk_embeddings)
