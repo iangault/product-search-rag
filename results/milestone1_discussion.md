@@ -2,12 +2,12 @@
 
 Our dataset is a join of `metadata` and `product reviews` on the unique Amazon ID. This means that reviews are unique, but product metadata is repeated. For now, we have focused our qualitative evaluation on product metadata; however, there is room to address some current bugs. 
 
-We conducted a qualitative evaluation comparing BM25 and semantic search across queries of varying difficulty. BM25 relies on keywords from the `product_title`, while the semantic model combines `product_title`, `category`, `details`, and `features` into a document to create a larger corpus for contextual interpretation. 
+We conducted a qualitative evaluation comparing BM25 and semantic search across queries of varying difficulty. Both BM25 and semantic search index the same set of metadata fields: `product_title`, `category`, `details`, and `features` into a do, so that the comparisons between the two methods reflect the differences in retrieval approach instead of different corpuses.
 
 **Current issues**:
 
 - We have duplicates in our search results. We are screening for 100 unique product titles and presenting the top 10 scores, but this may be contributing to errors for some products in a webapp search.
-- The difference in inputs between BM25 and semantic search may be a confounding factor. There may be 'junk' terms in the merged document that are not in natural language and reduce the effectiveness of the embedding index.
+- There may be 'junk' terms in the merged document that are not in natural language and reduce the effectiveness of the embedding index.
 - Performance for semantic search is poor. Further inquiry into the data pipeline is needed in a future milestone. We also need to understand why irrelevant results are sometimes returned.
 - More edge cases will be needed, such as returning a score of 0.0.
 

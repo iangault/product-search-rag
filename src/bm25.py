@@ -1,4 +1,5 @@
 # adapted from 575_lec05 "comparison between BM25 and embedding-based search"
+# Note: debugged by codex to incorporate parent_asin at index id
 
 from rank_bm25 import BM25Okapi
 from src.utils import text_preprocessor
@@ -20,26 +21,34 @@ class BM25Search:
     Examples
     --------
     >>> appliances = ["Coffee Maker", "Toaster Oven"]
-    >>> engine = BM25Search(appliances)
+    >>> appliance_ids = ["A1", "A2"]
+    >>> engine = BM25Search(appliances, appliance_ids)
     >>> engine.retrieve("coffee", top_k=1)
-    [('Coffee Maker', 0.0)]
+    [('A1', 0.0)]
     """
 
-    def __init__(self, products):
+    def __init__(self, products, ids):
         """
-        Initialize BM25Search search engine by indexing inputted products.
-        
+        Initialize the BM25 search engine by indexing input documents.
+
         Parameters
         ----------
         products : list of str
-            List of strings to be indexed for searching.
+            Documents to index for BM25 retrieval.
+        ids : list
+            Product identifiers aligned with `products`, such as
+            `parent_asin`.
 
         """
 
         if isinstance(products, str):
             products = [products]
 
+        if len(products) != len(ids):
+            raise ValueError("`products` and `ids` must have the same length.")
+
         self.products = products
+        self.ids = ids
         self.tokenized_corpus = [text_preprocessor(doc) for doc in products]
         self.bm25 = BM25Okapi(self.tokenized_corpus)
     
@@ -57,7 +66,7 @@ class BM25Search:
         Returns
         -------
         list of tuple
-            List of tuples where each tuple contains (product_text, score).
+            List of tuples where each tuple contains (product_id, score).
         
         """
 
@@ -68,7 +77,7 @@ class BM25Search:
                              key=lambda i: scores[i], 
                              reverse=True)[:top_k]
         
-        results = [(i, float(scores[i])) for i in top_idx]
+        results = [(self.ids[i], float(scores[i])) for i in top_idx]
 
         return results
     
@@ -83,20 +92,24 @@ class BM25Search:
             Path where pickle file will be saved.
 
         """
-
+ 
         with open(filepath, "wb") as f:
             pickle.dump(self, f)
 
     @staticmethod
     def load(filepath="data/processed/bm25_index.pkl"):
         """
-        Load the saved tokenized corpus and BM25 index.
-        
+        Load a saved BM25 search engine from disk.
+
         Parameters
         ----------
         filepath : str
-            Path where pickle file was saved.
-    
+            Path to the pickle file containing the saved BM25 engine.
+
+        Returns
+        -------
+        BM25Search
+            Loaded BM25 search engine with products, ids, and BM25 index.
         """
 
         with open(filepath, "rb") as f:

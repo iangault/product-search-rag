@@ -211,10 +211,5 @@ data/raw/*
 !data/raw/.gitkeep
 
 # Ignore large processed artifact
-data/processed/semantic_index.pkl
-data/processed/bm25_index.pkl
-data/processed/semantic.index
+data/processed/*
 
-# Submission
-Milestone_subission.md
-flow_chart.md

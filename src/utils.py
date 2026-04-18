@@ -4,6 +4,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer # suffix stripping
 import string
+import re
 
 # adapted from 563_lab3 preprocess.py
 # download only if not present
@@ -75,22 +76,41 @@ def text_preprocessor(text):
 
     return clean_tokens
 
+def clean_html(text):
+    """Remove HTML tags from text."""
+    
+    if not isinstance(text, str):
+        return text
+    
+    # assisted by https://regex101.com to generate regex patterns 
+    text = re.sub(r"</?br\s*/?>", "\n", text) # replace common break tags with line breaks
+    text = re.sub(r"\[\[VIDEOID:[^\]]*\]\]", "", text) #remove video ID tags
+    text = re.sub(r"<[^>]+>", " ", text) # remove any remaining simple HTML tags
+    text = re.sub(r"\n\s*\n+", "\n\n", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r" *\n *", "\n", text)
+
+    return text.strip()
+
 def normalize(col):
-    """Helper function for converting mixed dataframe
-      column types into strings
+    """Normalize mixed column values into readable strings.
 
-    This module keeps string columns the same, and converts lists
-    and dictionaries into readable text.
-    Output is still in original row and column index.
+    String inputs are returned unchanged, lists are recursively joined
+    into one string, and dictionaries are flattened into key-value
+    text.
 
-    Args:
-        col (str, list, dict): name of input column
+    Parameters
+    ----------
+    col : str, list, dict, or other
+        Single dataframe cell value to normalize.
 
-    Returns:
-        _type_: col of strings
+    Returns
+    -------
+    str
+        Normalized string representation of the input value.
     """
     if isinstance(col, str):
-        return col
+        return clean_html(col)
 
     if isinstance(col, list):
         strings = [normalize(item) for item in col]
@@ -103,16 +123,23 @@ def normalize(col):
     return ""
 
 def build_documents(df, columns):
-    """Buils one searchable document string per dataframe row by combining the normalized text from one or more selected column
+    """Build one searchable document string per dataframe row.
 
-    This is used before retrieval so that we have one source of combined text information
+    The selected columns are normalized and concatenated in row order,
+    preserving alignment with any row-based identifiers such as
+    `parent_asin`.
 
-    Args:
-        df (df): dataframe with normalized text columns
-        columns (list or str): column name if one column, or list of columns
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataframe containing the source text columns.
+    columns : str or list of str
+        Column name or names to combine into each searchable document.
 
-    Returns:
-        documents: list of documents where each item is a combination of normalized texts per observation
+    Returns
+    -------
+    list of str
+        Searchable document strings, one per dataframe row.
     """
 
     if isinstance(columns, str):

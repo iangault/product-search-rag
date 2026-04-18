@@ -10,6 +10,7 @@ if str(root_dir) not in sys.path:
 
 from src.bm25 import BM25Search
 from src.semantic import SemanticSearch
+from src.utils import build_documents
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -20,7 +21,7 @@ def main():
     indices and save them to disk.
     """
     # Processed Data
-    data_path = root_dir / "data" / "processed" / "merged.parquet"
+    data_path = root_dir / "data" / "processed" / "processed.parquet"
     # Path to the BM25 index
     index_path_bm = root_dir / "data" / "processed" / "bm25_index.pkl"
     # Path to the SemanticSearch index
@@ -28,26 +29,44 @@ def main():
 
     if not data_path.exists():
         print(f"Error: Data file not found at {data_path}")
-        print("Please run EDA notebook first.")
+        print("Please run src/import_process.py first.")
         return
 
     # load data
-    print("\nLoading parquet...\n")
+    print("Loading parquet...")
     df = pd.read_parquet(data_path)
 
     # BM25 Save
-    products = df["product_title"].tolist()
-    print("\nStarting BM25 Embeddings...\n")
-    engine_bm = BM25Search(products)
+    # Columns as input into both search engines
+    cols = ["product_title",
+            "features",
+            "description",
+            "categories",
+            "details",
+            "review_text", # flattened aggregated review title and text
+            ]
+    
+    # For semantic search, we are using one document without chunking
+    # The documents with review data becomes too big and crashing
+    # Therefore, we are excluding reviews from the semantic embeddings
+    # Because they also add noise to the actual metadata
+    semantic_cols = ["product_title",
+                     "features",
+                     "description",
+                     "categories",
+                     "details",
+                     ]
+
+    bm25_docs = build_documents(df, cols)
+    doc_ids = df["parent_asin"].tolist()
+    print("Building BM25 index...")
+    engine_bm = BM25Search(bm25_docs, ids=doc_ids)
     engine_bm.save(index_path_bm)
 
     # SemanticSearch
-    print("\nStarting Semantic Embeddings...\n")
+    print("Building semantic index...")
 
-    # Columns as input into the semantic search
-    cols = ["product_title", "features", "description", "categories", "details"]
-
-    engine_sem = SemanticSearch(df, cols)
+    engine_sem = SemanticSearch(df, semantic_cols)
     engine_sem.save(index_path_sem)
 
 

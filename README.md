@@ -6,27 +6,91 @@ GitHub Repository: [UBC-MDS/DSCI_575_project_gaultian_chrchow](https://github.co
 
 ### Project Goal
 
-This project aims to build a context-aware product search assistant using the Amazon Reviews 2023 dataset with BM25 keyword and semantic vector searches. Future milestones will incorporate the use of LLMs in the search assistant.
+This project builds a context-aware product search assistant using the Amazon Reviews 2023 dataset. The app supports BM25 keyword search, semantic vector search, hybrid search, and retrieval-augmented generation (RAG) workflows including a hybrid RAG mode for grounded question answering over product metadata and review text.
 
 ### Dataset Description
 
-For this project, we are using the Appliances category from the [Amazon Reviews 2023 dataset](https://amazon-reviews-2023.github.io) collected in 2023 by [McAuley Lab](https://cseweb.ucsd.edu/~jmcauley/). There are two different files available in this category: *User Reviews* containing reviews, star ratings, etc, and *Item Metadata* containing descriptions, price, and other features. The raw .json.gz files were loaded and merged together on `parent_asin` before undergoing text preprocessing (lowercasing and punctuation removal) to create a searchable corpus. Merging the files together would allow the retrieval system to match queries from both the product specifications and user reviews.
+For this project, we are using the Appliances category from the [Amazon Reviews 2023 dataset](https://amazon-reviews-2023.github.io) collected in 2023 by [McAuley Lab](https://cseweb.ucsd.edu/~jmcauley/). There are two different files available in this category: *User Reviews* containing reviews, star ratings, etc, and *Item Metadata* containing descriptions, price, and other features. The raw `.jsonl.gz` files are loaded, written to parquet, and merged together on `parent_asin` to create a searchable product-level corpus. BM25 query and document text are then tokenized with lowercasing, punctuation stripping, stopword removal, and stemming at retrieval time. Merging the files together allows the retrieval system to match queries from both the product specifications and user reviews.
 
 ### Retrieval Workflows
 
+BM25 indexes `product_title`, `features`, `description`, `categories`, `details`, and `review_text`. Semantic search indexes `product_title`, `features`, `description`, `categories`, and `details`, excluding review text so the vector index stays focused on product metadata.
+
 BM25 search was performed using the [`rank_bm25`](https://pypi.org/project/rank-bm25/) package. Both the corpus and user queries are processed and tokenized before results are ranked based on a derivation of the TF-IDF (term frequency - inverse document frequency).
 
-Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from the [`sentence-transformers`](https://huggingface.co/sentence-transformers) to generate document embeddings. These embeddings were then indexed using [FAISS](https://faiss.ai/index.html) (Facebook AI Similarity Search) to enable similarity searches. Cosine similarity was used to calculate vector similarity and results are retrieved using k-nearest neighbours.
+Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from the [`sentence-transformers`](https://huggingface.co/sentence-transformers) to generate document embeddings. Embedding generation automatically detects whether CUDA is available and otherwise falls back to CPU. These embeddings were then indexed using the CPU build of [FAISS](https://faiss.ai/index.html) (Facebook AI Similarity Search) to keep indexing and search portable across both CUDA-enabled machines and standard laptops. Cosine similarity was used to calculate vector similarity and results are retrieved using k-nearest neighbours.
+
+### LLM Model
+
+We use `Qwen3-32B` via the [Groq API](https://console.groq.com/) as the LLM for both RAG pipelines. Qwen3 is an open-source large language model from Alibaba Cloud that generates clear, grounded answers when given retrieved product context. We picked the 32B size over smaller variants for better answer quality, and Groq's free API is fast enough for interactive use without requiring local GPU.
+
+### RAG Workflows
+
+#### Semantic RAG
+
+Semantic RAG uses a FAISS vector store built from chunked product documents to find the most relevant results for a query. The retrieved chunks are built into a context block and passed to the LLM to generate an answer.
+
+```mermaid
+flowchart TD
+    P[processed.parquet] --> Q[build_documents<br/>src/utils.py]
+    Q --> R[normalize + clean_html<br/>flatten text and strip HTML]
+    R --> B[Saved FAISS retriever<br/>data/processed/rag_faiss]
+    A[User Query] --> B
+    B --> C[Top-5 retrieved chunks]
+    C --> D[relevant_text:<br/>format chunk metadata + text]
+    D --> E[build_prompt:<br/>query + grounded context]
+    E --> F[Qwen3-32B via Groq API]
+    F --> G[clean_response:<br/>remove think block]
+    G --> H[Display answer +<br/>supporting source cards]
+```
+
+#### Hybrid RAG
+
+Hybrid RAG combines BM25 and semantic search results using Reciprocal Rank Fusion (RRF) into a single ranked list of products. The top ranked products are built into a context block and passed to the LLM to generate an answer.
+
+```mermaid
+flowchart TD
+    P[processed.parquet] --> Q[build_documents<br/>src/utils.py]
+    Q --> R[normalize + clean_html<br/>flatten text and strip HTML]
+    R --> B[BM25 index]
+    R --> C[Semantic index]
+    A[User Query] --> B
+    A --> C
+    B --> D[BM25Search.retrieve]
+    C --> E[SemanticSearch.retrieve]
+    D --> F[Top results by parent_asin]
+    E --> G[Top results by parent_asin]
+    F --> H[HybridRetriever:<br/>Reciprocal Rank Fusion]
+    G --> H
+    H --> I[Top-5 fused products]
+    I --> J[relevant_text_hybrid:<br/>format product context]
+    J --> K[build_prompt:<br/>query + grounded context]
+    K --> L[Qwen3-32B via Groq API]
+    L --> M[clean_response:<br/>remove think block]
+    M --> N[Display answer +<br/>supporting product cards]
+```
+
+### Web App Features
+
+To interact with the information retrieval systems, we developed a simple web app using Streamlit. Features include:
+
+* Search Mode Selection: Users can toggle between BM25, Semantic, Hybrid, RAG and Hybrid RAG search modes
+
+* User Query Input: A natural language text box for querying
+
+* Detailed Search Results: For each retrieved product, the app displays the product title, a truncated review, the star rating, and the retrieval score for BM25 or Semantic search
+
+* RAG Answer Panel: In RAG mode and Hybrid RAG modes, the app generates a grounded answer and shows supporting product cards. RAG mode also shows the retrieved chunk text used as evidence, while Hybrid RAG shows product review context.
 
 ### Repository Structure
 
-BM25 and SemanticSearch are defined in their own scripts, but as called in `build_index.py`
+BM25, semantic retrieval, and RAG components are defined in `src/` and built through separate indexing scripts.
 
 ```text
 DSCI_575_project_gaultian_chrchow/
 ├── app/
 │   └── app.py
-│      Streamlit application for running BM25 and semantic product search.
+│      Streamlit application for BM25, semantic, and RAG-based product search.
 │
 ├── data/
 │   ├── raw/
@@ -41,9 +105,18 @@ DSCI_575_project_gaultian_chrchow/
 │   │   Semantic retrieval class using SentenceTransformers and FAISS.
 │   ├── build_index.py
 │   │   Script to build and save BM25 and semantic search indexes from the processed dataset.
+│   ├── rag_pipeline.py
+│   │   RAG retrieval, prompt-building, and answer-generation helpers.
+│   ├── hybrid.py
+│   │   Hybrid retriever class combining BM25 and semantic search using Reciprocal Rank Fusion (RRF).
+│   ├── build_rag.py
+│   │   Script to build and save the FAISS index used by the RAG pipeline.
+│   ├── prompts.py
+│   │   Prompt template helpers for the RAG answer generation step.
 │   └── utils.py
 │       Utility helpers used by retrieval:
 │       - `text_preprocessor`: tokenization, stopword removal, and stemming for BM25
+│       - `clean_html`: strips HTML tags and normalizes display text
 │       - `normalize`: converts strings, lists, and dicts into plain text
 │       - `build_documents`: combines selected columns into one searchable document per row
 │
@@ -63,26 +136,7 @@ DSCI_575_project_gaultian_chrchow/
     Convenience commands for environment setup, index building, app launch, and cleanup.
 ```
 
-### Web App Features
-
-To interact with the information retrieval systems, we developed a simple web app using Streamlit. Features include:
-
-* Search Mode Selection: Users can toggle between BM25 and Semantic search methods to compare results
-
-* User Query Input: A natural language text box for querying
-
-* Detailed Search Results: For each retrieved product, the app will display the product title, a truncated review, the star rating and the retrieval score (BM25 or Semantic)
-
-### Repository Installation
-
-1.  **Installation** After opening a terminal, clone the repository and navigate to the project directory:
-
-        ```bash
-        git clone https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow.git
-        cd DSCI_575_project_gaultian_chrchow
-        ```
-
-### Setup Instructions
+### Installation and Setup
 
  **Note**: For a summary of makefile actions:
 
@@ -90,16 +144,23 @@ To interact with the information retrieval systems, we developed a simple web ap
 make help
 ```
 
+1.  **Clone the repository** After opening a terminal, clone the repository and navigate to the project directory:
+
+    ```bash
+    git clone https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow.git
+    cd DSCI_575_project_gaultian_chrchow
+    ```
+
 2.  **Environment Setup**
 
-    1. Create or Prune the Conda environment:
+    i. Create or Prune the Conda environment:
 
         ```bash
         make create
         make prune
         ```
 
-    2. Activate the Conda environment:
+    ii. Activate the Conda environment:
 
         ```bash
         conda activate 575_proj
@@ -108,20 +169,51 @@ make help
 3.  **Environment Variables** Create an `.env` file in root directory. Note: Do not commit this file to Github!
 
     ```bash
-    HF_TOKEN=<your_huggingface_token>
-    ANTHROPIC_API_KEY=<your_anthropic_api_key_here>
+    GROQ_API_KEY=<your_groq_api_key>
     ```
 
 4. **Data Preparation and Indexing** To reproduce our results:
 
-    1.  **EDA** run all cells in `notebooks/milestone1_exploration.ipynb` to process raw data into `data/processed/merged.parquet`.
+    1. **Import and Pre-Processing**
 
-    2.  **Indexing:** run the indexing script in to build BM25 and Semantic search indices:
+        a. Import the raw metadata and review data from <https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw>
+        
+        b. Merge datasets
+        
+        c. Pre-processing of text data
+        
+        d. Save as `processed.parquet`
 
-        Due to the large file sizes, we have added processed indexing data to .gitignore, and so `make build` is an essential step to run the app
+        To balance processing time with meaningful information retrievals, we chose to load 20k metadata products and 200k reviews.
 
         ```bash
-        make build
+        make process
+        ```
+
+    2. **EDA** Optional step. Internal data exploration to inform analysis
+
+        a. Run all cells in `notebooks/milestone1_exploration.ipynb` for the earlier Milestone 1 exploration workflow.
+
+        b. Run all cells in `notebooks/milestone2_exploration.ipynb` to explore `data/processed/processed.parquet` and confirm pre-processing steps taken in `import_process.py`. (Improvements made in Milestone 2)
+
+    3.  **Build IR indexes:** run the indexing script to build BM25 and Semantic search indices:
+
+        Derived from `data/processed/processed.parquet`.
+
+        Due to the large file sizes, processed indexing artifacts are ignored by git, so `make build-ir` is an essential step to run BM25 and Semantic search in the app.
+
+        ```bash
+        make build-ir
+        ```
+
+    4.  **Build RAG index:** run the RAG indexing script to build the persisted FAISS chunk index used by the RAG mode:
+
+        Also derived from `data/processed/processed.parquet`.
+
+        `make build-rag` is required before using RAG mode in the app.
+
+        ```bash
+        make build-rag
         ```
 
 5.  **Running the Web App** Launch the Streamlit dashboard:
@@ -130,12 +222,18 @@ make help
     make run
     ```
 
-    Once finished using the app, close the window in the browser, and in terminal press `cntl + c` to stop running the app.
+    Once finished using the app, close the window in the browser, and in terminal press `ctrl + c` to stop running the app.
 
-6. **Remove index data** in `data/processed/`:
+6. **Remove processed data and index artifacts** in `data/processed/`:
 
-    If wanting to confirm a clean state of index files, or reduce memory, before closing up the project.
+    If you want to return the project to a clean generated-data state before closing up the project.
 
     ``` bash
     make clean
     ```
+
+To run the full pipeline of `make clean`, `make process`, `make build-ir`, `make build-rag`, and `make run`:
+
+``` bash
+make all
+```
