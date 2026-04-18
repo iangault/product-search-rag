@@ -23,7 +23,6 @@ from src.rag_pipeline import (
     get_llm,
     get_rag_index_version,
     load_retriever,
-    load_hybrid_retriever,
 )
 
 from dotenv import load_dotenv
@@ -80,8 +79,14 @@ def load_search(_version: tuple[float, float, float]):
 def load_rag(_version: tuple[float, object]):
     # Keep loaded RAG resources alive across reruns.
     retriever = load_retriever(get_embeddings())
-    llm = get_llm()
+    llm = load_llm()
     return retriever, llm
+
+
+@st.cache_resource
+def load_llm():
+    # Share one LLM client across app modes and reruns.
+    return get_llm()
 
 # load data
 # Changed to index by parent_asin
@@ -94,8 +99,8 @@ rag_llm = None
 if get_rag_index_version() is not None:
     rag_retriever, rag_llm = load_rag(get_rag_version())
 
-hybrid_retriever = load_hybrid_retriever()
-hybrid_llm = get_llm()
+hybrid_retriever = hybrid_search
+hybrid_llm = load_llm()
 
 st.divider()
 
