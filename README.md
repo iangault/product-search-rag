@@ -20,47 +20,6 @@ BM25 search was performed using the [`rank_bm25`](https://pypi.org/project/rank-
 
 Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from the [`sentence-transformers`](https://huggingface.co/sentence-transformers) to generate document embeddings. These embeddings were then indexed using [FAISS](https://faiss.ai/index.html) (Facebook AI Similarity Search) to enable similarity searches. Cosine similarity was used to calculate vector similarity and results are retrieved using k-nearest neighbours.
 
-### LLM Model
-
-We use `Qwen3-32B` via the [Groq API](https://console.groq.com/) as the LLM for both RAG pipelines. Qwen3 is an open-source large language model from Alibaba Cloud that generates clear, grounded answers when given retrieved product context. We picked the 32B size over smaller variants for better answer quality, and Groq's free API is fast enough for interactive use without requiring local GPU.
-
-### RAG Workflows
-
-#### Semantic RAG
-
-Semantic RAG uses a FAISS vector store built from chunked product documents to find the most relevant results for a query. The retrieved chunks are built into a context block and passed to the LLM to generate an answer.
-
-```mermaid
-flowchart TD
-    A[User Query] --> B[FAISS Vector Store Retriever]
-    B --> C[Top-5 relevant document chunks]
-    C --> D[relevant_text: build context block]
-    D --> E[build_prompt: system prompt + context + query]
-    E --> F[Qwen3-32B via Groq API]
-    F --> G[clean_response: strip thinking block]
-    G --> H[Display answer + supporting sources]
-```
-
-#### Hybrid RAG
-
-Hybrid RAG combines BM25 and semantic search results using Reciprocal Rank Fusion (RRF) into a single ranked list of products. The top ranked products are built into a context block and passed to the LLM to generate an answer.
-
-```mermaid
-flowchart TD
-    A[User Query] --> B[BM25Search]
-    A --> C[SemanticSearch]
-    B --> D[Top-k BM25 results]
-    C --> E[Top-k Semantic results]
-    D --> F[HybridRetriever: Reciprocal Rank Fusion]
-    E --> F
-    F --> G[Ranked top-5 products]
-    G --> H[relevant_text_hybrid: build context block]
-    H --> I[build_prompt: system prompt + context + query]
-    I --> J[Qwen3-32B via Groq API]
-    J --> K[clean_response: strip thinking block]
-    K --> L[Display answer + supporting sources]
-```
-
 ### Repository Structure
 
 BM25, semantic retrieval, and RAG components are defined in `src/` and built through separate indexing scripts.
@@ -112,6 +71,47 @@ DSCI_575_project_gaultian_chrchow/
 │
 └── Makefile
     Convenience commands for environment setup, index building, app launch, and cleanup.
+```
+
+### LLM Model
+
+We use `Qwen3-32B` via the [Groq API](https://console.groq.com/) as the LLM for both RAG pipelines. Qwen3 is an open-source large language model from Alibaba Cloud that generates clear, grounded answers when given retrieved product context. We picked the 32B size over smaller variants for better answer quality, and Groq's free API is fast enough for interactive use without requiring local GPU.
+
+### RAG Workflows
+
+#### Semantic RAG
+
+Semantic RAG uses a FAISS vector store built from chunked product documents to find the most relevant results for a query. The retrieved chunks are built into a context block and passed to the LLM to generate an answer.
+
+```mermaid
+flowchart TD
+    A[User Query] --> B[FAISS Vector Store Retriever]
+    B --> C[Top-5 relevant document chunks]
+    C --> D[relevant_text: build context block]
+    D --> E[build_prompt: system prompt + context + query]
+    E --> F[Qwen3-32B via Groq API]
+    F --> G[clean_response: strip thinking block]
+    G --> H[Display answer + supporting sources]
+```
+
+#### Hybrid RAG
+
+Hybrid RAG combines BM25 and semantic search results using Reciprocal Rank Fusion (RRF) into a single ranked list of products. The top ranked products are built into a context block and passed to the LLM to generate an answer.
+
+```mermaid
+flowchart TD
+    A[User Query] --> B[BM25Search]
+    A --> C[SemanticSearch]
+    B --> D[Top-k BM25 results]
+    C --> E[Top-k Semantic results]
+    D --> F[HybridRetriever: Reciprocal Rank Fusion]
+    E --> F
+    F --> G[Ranked top-5 products]
+    G --> H[relevant_text_hybrid: build context block]
+    H --> I[build_prompt: system prompt + context + query]
+    I --> J[Qwen3-32B via Groq API]
+    J --> K[clean_response: strip thinking block]
+    K --> L[Display answer + supporting sources]
 ```
 
 ### Web App Features
