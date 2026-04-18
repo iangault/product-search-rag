@@ -4,6 +4,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer # suffix stripping
 import string
+import re
 
 # adapted from 563_lab3 preprocess.py
 # download only if not present
@@ -75,6 +76,18 @@ def text_preprocessor(text):
 
     return clean_tokens
 
+def clean_html(text):
+    """Remove HTML tags from text."""
+    
+    if not isinstance(text, str):
+        return text
+    
+    # assisted by https://regex101.com to generate regex patterns 
+    text = re.sub(r"<br\s*/?>", " ", text) #replace <br> tags with space
+    text = re.sub(r"\[\[VIDEOID:[^\]]*\]\]", "", text) #remove video ID tags
+
+    return text
+
 def normalize(col):
     """Normalize mixed column values into readable strings.
 
@@ -93,7 +106,7 @@ def normalize(col):
         Normalized string representation of the input value.
     """
     if isinstance(col, str):
-        return col
+        return clean_html(col)
 
     if isinstance(col, list):
         strings = [normalize(item) for item in col]
