@@ -20,59 +20,6 @@ BM25 search was performed using the [`rank_bm25`](https://pypi.org/project/rank-
 
 Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from the [`sentence-transformers`](https://huggingface.co/sentence-transformers) to generate document embeddings. These embeddings were then indexed using [FAISS](https://faiss.ai/index.html) (Facebook AI Similarity Search) to enable similarity searches. Cosine similarity was used to calculate vector similarity and results are retrieved using k-nearest neighbours.
 
-### Repository Structure
-
-BM25, semantic retrieval, and RAG components are defined in `src/` and built through separate indexing scripts.
-
-```text
-DSCI_575_project_gaultian_chrchow/
-├── app/
-│   └── app.py
-│      Streamlit application for BM25, semantic, and RAG-based product search.
-│
-├── data/
-│   ├── raw/
-│   │   Original input data files.
-│   └── processed/
-│       Processed data and saved retrieval indexes used by the app.
-│
-├── src/
-│   ├── bm25.py
-│   │   BM25 retrieval class, including index building, searching, saving, and loading.
-│   ├── semantic.py
-│   │   Semantic retrieval class using SentenceTransformers and FAISS.
-│   ├── build_index.py
-│   │   Script to build and save BM25 and semantic search indexes from the processed dataset.
-│   ├── rag_pipeline.py
-│   │   RAG retrieval, prompt-building, and answer-generation helpers.
-│   ├── hybrid.py
-│   │   Hybrid retriever class combining BM25 and semantic search using Reciprocal Rank Fusion (RRF).
-│   ├── build_rag.py
-│   │   Script to build and save the FAISS index used by the RAG pipeline.
-│   ├── prompts.py
-│   │   Prompt template helpers for the RAG answer generation step.
-│   └── utils.py
-│       Utility helpers used by retrieval:
-│       - `text_preprocessor`: tokenization, stopword removal, and stemming for BM25
-│       - `normalize`: converts strings, lists, and dicts into plain text
-│       - `build_documents`: combines selected columns into one searchable document per row
-│
-├── notebooks/
-│   Project notebooks for EDA, preprocessing, and experimentation.
-│
-├── requirements.txt
-│   Python package requirements.
-│
-├── environment.yml
-│   Conda environment specification for reproducing the project setup.
-│
-├── README.md
-│   Project overview, setup instructions, and usage documentation.
-│
-└── Makefile
-    Convenience commands for environment setup, index building, app launch, and cleanup.
-```
-
 ### LLM Model
 
 We use `Qwen3-32B` via the [Groq API](https://console.groq.com/) as the LLM for both RAG pipelines. Qwen3 is an open-source large language model from Alibaba Cloud that generates clear, grounded answers when given retrieved product context. We picked the 32B size over smaller variants for better answer quality, and Groq's free API is fast enough for interactive use without requiring local GPU.
@@ -125,6 +72,59 @@ To interact with the information retrieval systems, we developed a simple web ap
 * Detailed Search Results: For each retrieved product, the app displays the product title, a truncated review, the star rating, and the retrieval score for BM25 or Semantic search
 
 * RAG Answer Panel: In RAG mode and Hybrid RAG modes, the app generates a grounded answer and shows supporting product cards plus the retrieved chunk text used as evidence
+
+### Repository Structure
+
+BM25, semantic retrieval, and RAG components are defined in `src/` and built through separate indexing scripts.
+
+```text
+DSCI_575_project_gaultian_chrchow/
+├── app/
+│   └── app.py
+│      Streamlit application for BM25, semantic, and RAG-based product search.
+│
+├── data/
+│   ├── raw/
+│   │   Original input data files.
+│   └── processed/
+│       Processed data and saved retrieval indexes used by the app.
+│
+├── src/
+│   ├── bm25.py
+│   │   BM25 retrieval class, including index building, searching, saving, and loading.
+│   ├── semantic.py
+│   │   Semantic retrieval class using SentenceTransformers and FAISS.
+│   ├── build_index.py
+│   │   Script to build and save BM25 and semantic search indexes from the processed dataset.
+│   ├── rag_pipeline.py
+│   │   RAG retrieval, prompt-building, and answer-generation helpers.
+│   ├── hybrid.py
+│   │   Hybrid retriever class combining BM25 and semantic search using Reciprocal Rank Fusion (RRF).
+│   ├── build_rag.py
+│   │   Script to build and save the FAISS index used by the RAG pipeline.
+│   ├── prompts.py
+│   │   Prompt template helpers for the RAG answer generation step.
+│   └── utils.py
+│       Utility helpers used by retrieval:
+│       - `text_preprocessor`: tokenization, stopword removal, and stemming for BM25
+│       - `normalize`: converts strings, lists, and dicts into plain text
+│       - `build_documents`: combines selected columns into one searchable document per row
+│
+├── notebooks/
+│   Project notebooks for EDA, preprocessing, and experimentation.
+│
+├── requirements.txt
+│   Python package requirements.
+│
+├── environment.yml
+│   Conda environment specification for reproducing the project setup.
+│
+├── README.md
+│   Project overview, setup instructions, and usage documentation.
+│
+└── Makefile
+    Convenience commands for environment setup, index building, app launch, and cleanup.
+```
 
 ### Installation and Setup
 
