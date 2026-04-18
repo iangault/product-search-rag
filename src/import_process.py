@@ -49,7 +49,8 @@ def main():
     ##### PROCESSING ######
 
     # Brainstormed with ChatGBT to get a complex
-    # SQL function to process the data
+    # SQL function to process the data.
+    # Also, for debugged and make more efficient with CUDA changes
     # 1) Imports raw review and metadata files
     # 2) joins them by `parent_asin`
     # 3) aggregates review title + text pairs into product-level review fields

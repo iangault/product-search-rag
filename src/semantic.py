@@ -7,7 +7,7 @@ from src.utils import build_documents
 
 # NOTE: Brainstorming with ChatGBT5 was done to develop the class
 # and learn about new packages
-# Debugged with codex to index based on `parent_asin`
+# Debugged with codex to index based on `parent_asin` and CUDA
 
 # No longer using review data
 # With metadata still need to run in batches
