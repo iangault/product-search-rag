@@ -7,6 +7,7 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 
+
 # get proj root dir and add to path so can import from src
 root_dir = Path(__file__).resolve().parent.parent
 if str(root_dir) not in sys.path:
@@ -14,12 +15,15 @@ if str(root_dir) not in sys.path:
 
 from src.bm25 import BM25Search
 from src.semantic import SemanticSearch
+from src.hybrid import HybridRetriever
 from src.rag_pipeline import (
     answer_query,
+    answer_query_hybrid,
     get_embeddings,
     get_llm,
     get_rag_index_version,
     load_retriever,
+    load_hybrid_retriever,
 )
 
 from dotenv import load_dotenv
@@ -68,7 +72,8 @@ def load_search(_version: tuple[float, float, float]):
     # cache them as resources and reuse across interactions.
     bm25 = BM25Search.load(index_path_bm)
     semantic = SemanticSearch.load(index_path_sem)
-    return bm25, semantic
+    hybrid = HybridRetriever(bm25, semantic)
+    return bm25, semantic, hybrid
 
 
 @st.cache_resource
@@ -82,19 +87,22 @@ def load_rag(_version: tuple[float, object]):
 # Changed to index by parent_asin
 df = load_data(get_data_version())
 df_by_asin = df.set_index("parent_asin", drop=False)
-bm25_search, semantic_search = load_search(get_search_version())
+bm25_search, semantic_search, hybrid_search = load_search(get_search_version())
 rag_retriever = None
 rag_llm = None
 
 if get_rag_index_version() is not None:
     rag_retriever, rag_llm = load_rag(get_rag_version())
 
+hybrid_retriever = load_hybrid_retriever()
+hybrid_llm = get_llm()
+
 st.divider()
 
 # search mode selector - radio buttons
 search_mode = st.radio(
     "Select Search Mode:",
-    ["BM25", "Semantic", "RAG"],
+    ["BM25", "Semantic", "Hybrid", "RAG", "Hybrid RAG"],
     horizontal=True,
     key = "search_mode",
 )
@@ -126,6 +134,24 @@ if submitted and query:
             results = semantic_search.retrieve(query, top_k=10)
             rag_answer = None
             retrieved_docs = []
+
+        elif search_mode == "Hybrid":
+            results = hybrid_search.retrieve(query, top_k=10)
+            rag_answer = None
+            retrieved_docs = []
+        
+        elif search_mode == "Hybrid RAG":
+            rag_answer, results = answer_query_hybrid(
+                query,
+                df_by_asin=df_by_asin,
+                hybrid_retriever=hybrid_retriever,
+                llm=hybrid_llm,
+            )
+
+            st.markdown("### Answer")
+            st.markdown(rag_answer)
+            st.divider()
+            st.markdown("### Supporting Sources")
 
         else:
             if rag_retriever is None or rag_llm is None:
@@ -175,7 +201,7 @@ if submitted and query:
                 review_display = "No candidate review available."
 
             # Keep result cards compact even when the stored review text is long.
-            trunc_text = review_display[:200] + "..." if len(review_display) > 200 else review_display
+            trunc_text = review_display[:500] + "..." if len(review_display) > 500 else review_display
 
             try:
                 avg_rating = float(item_data.get("derived_avg_rating"))
@@ -228,4 +254,15 @@ if submitted and query:
                     with st.expander("Show retrieved context"):
                         st.text(matching_doc.page_content)
 
+            elif search_mode == "Hybrid RAG":
+                with st.expander("Show retrieved context"):
+                    row = df_by_asin.loc[parent_asin] if parent_asin in df_by_asin.index else None
+                    if row is not None:
+                        review_text = row.get("review_text", "N/A")
+                        if pd.isna(review_text) or not str(review_text, str):
+                            st.text("No review text available for this product.")
+                        else:
+                            if len(review_text) > 1000:
+                                review_text = review_text[:1000] + "..."
+                                st.text(review_text)
             st.divider()

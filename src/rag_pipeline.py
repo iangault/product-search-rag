@@ -21,6 +21,9 @@ if str(root_dir) not in sys.path:
 
 from src.utils import build_documents
 from src.prompts import build_prompt
+from src.bm25 import BM25Search
+from src.semantic import SemanticSearch
+from src.hybrid import HybridRetriever
 
 # Processed Data
 data_path = root_dir / "data" / "processed" / "processed.parquet"
@@ -45,8 +48,15 @@ def get_llm():
     return ChatGroq(
         model="qwen/qwen3-32b",
         temperature=0.2,  # adjust higher for more creative responses,
-        max_tokens=100,
+        max_tokens=1000,
     )
+
+def clean_response(text):
+    """Clean LLM response by removing qwen3 chain-of-thought <think> block"""
+    if "<think>" in text and "</think>" in text:
+        end = text.find("</think>")
+        text = text[end + len("</think>"):].strip()
+    return text
 
 # Need to call model again because we are rerunning the embedding with chunking
 def get_embeddings():
@@ -148,11 +158,11 @@ def load_retriever(embeddings):
 
 
 # Context builder
-def relevant_text(retreived_docs):
-    """Formats retreived docs to pass to LLM prompt"""
+def relevant_text(retrieved_docs):
+    """Formats retrieved docs to pass to LLM prompt"""
 
     blocks = []
-    for doc in retreived_docs:
+    for doc in retrieved_docs:
         blocks.append(
             f"Product Title: {doc.metadata.get('product_title', 'N/A')}\n"
             f"ASIN: {doc.metadata.get('parent_asin', 'N/A')}\n"
@@ -179,4 +189,91 @@ def answer_query(query, retriever=None, llm=None):
     prompt = build_prompt(query, context)
     response = llm.invoke(prompt)
 
-    return response.content, retrieved_docs
+    return clean_response(response.content), retrieved_docs
+
+# Hybrid RAG Pipeline
+
+# Paths for BM25 and Semantic search indices
+bm25_index_path = root_dir / "data" / "processed" / "bm25_index.pkl"
+semantic_index_path = root_dir / "data" / "processed" / "semantic.index"
+
+def load_hybrid_retriever():
+    """Load saved BM25 and Semantic indices from disk and return HybridRetriever instance."""
+    bm25 = BM25Search.load(bm25_index_path)
+    semantic = SemanticSearch.load(semantic_index_path)
+    return HybridRetriever(bm25, semantic)
+
+def relevant_text_hybrid(results, df_by_asin):
+    """Format hybrid retriever results into context block for LLM prompt.
+
+    Parameters
+    ----------
+    results : list of tuple
+        Each tuple is (product_id, rrf_score) from HybridRetriever.
+    df_by_asin : pd.DataFrame
+        DataFrame indexed by parent_asin.
+
+    Returns
+    -------
+    str
+        Formatted context string to pass to LLM prompt.
+
+    """
+
+    blocks = []
+
+    for rank, (asin, score) in enumerate(results, start=1):
+        if asin not in df_by_asin.index:
+            continue
+
+        row = df_by_asin.loc[asin]
+
+        review_text = row.get("review_text", "N/A")
+        if isinstance(review_text, str) and len(review_text) > 500:
+            review_text = review_text[:500] + "..."
+
+        blocks.append(
+            f"Product Title: {row.get('product_title', 'N/A')}\n"
+            f"ASIN: {row.get('parent_asin', 'N/A')}\n"
+            f"Rating: {row.get('derived_avg_rating', 'N/A')}\n"
+            f"Review Count: {row.get('n_reviews', 'N/A')}\n"
+            f"Helpful Votes: {row.get('candidate_review_helpful_vote', 'N/A')}\n"
+            f"Price: {row.get('price', 'N/A')}\n"
+            f"Retrieved Text:\n{review_text}"
+        )
+
+    return "\n\n".join(blocks)
+
+def answer_query_hybrid(query, df_by_asin, hybrid_retriever=None, llm=None):
+    """Run hybrid retrieval, build prompt, return model answer.
+
+    Parameters
+    ----------
+    query : str
+        User's search query.
+    df_by_asin : pd.DataFrame
+        DataFrame indexed by parent_asin.
+    hybrid_retriever : HybridRetriever, optional
+        Pre-loaded HybridRetriever. If None, load from disk.
+    llm : ChatGroq, optional
+        Pre-loaded LLm. If None, create one with get_llm().
+
+    Returns
+    -------
+    tuple of (str, list)
+        LLM response string and retriever results list.
+
+    """
+
+    if hybrid_retriever is None:
+        hybrid_retriever = load_hybrid_retriever()
+
+    if llm is None:
+        llm = get_llm()
+
+    results = hybrid_retriever.retrieve(query, top_k=RETRIEVER_K)
+    context = relevant_text_hybrid(results, df_by_asin)
+    prompt = build_prompt(query, context)
+    response = llm.invoke(prompt)
+
+    return clean_response(response.content), results

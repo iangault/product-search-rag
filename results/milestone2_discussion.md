@@ -14,3 +14,49 @@ It also updates app.py to read from processed.parquet instead of the old merged 
 The documents/ids alignment is consistent across the src/ pipeline. The processed dataset is built at one row per parent_asin, BM25 documents are generated from that same dataframe with one combined document per row, and the BM25 IDs come from the same dataframe’s parent_asin column. That means each BM25 document and each ID stay in a 1-to-1 positional mapping.
 
 The semantic retrieval path follows the same pattern: it derives parent_asin IDs and searchable documents from the same dataframe, so both retrieval systems use stable product IDs aligned to one document per product row.
+
+!!! flag - per m2's 2.3 prompt template design:
+* Experiment with a few (2-3) different system prompt variants and find out what works well for you.
+* Document findings in results/milestone2_discussion.md file.
+Note: where is it in m2-rubric???
+
+## Qualitative Evaluation of Hybrid RAG
+
+We ran the same 10 queries from Milestone 1 through the hybrid RAG pipeline. Each answer is rated on the following three dimensions below:
+
+- **Accuracy**: Is the answer factually correct based on the reviews? Yes/No
+- **Completeness**: Does the answer address all aspects of the question? Yes/No
+- **Fluency**: Is the answer natural, clear, and easy to read? Yes/No
+
+### Query Results
+
+| Query | Accuracy | Completeness | Fluency | Notes |
+|-------|----------|--------------|---------|-------|
+| Washing machine | No | No | Yes | Returned obscure mini washers with 1 review instead of well known washers |
+| Stainless steel coffee maker | Yes | No | Yes | Found pour over drippers/filters instead of drip coffee machines |
+| Replacement Parts DC61-02610A | Yes | Yes | Yes | Correctly identified and found exact product |
+| Magic bullet | No | No | Yes | Found replacement parts but not the Magic Bullet blender itself |
+| Whirlpool | Yes | No | Yes | Found Whirlpool replacement parts but not any Whirlpool appliances |
+| Washingmachine | Yes | No | Yes | Found results despite typo (shows robustness) but returned low rated products |
+| kitchen device to heat food quickly | Yes | Yes | Yes | Found relevant heating appliances with review support |
+| Something to cook pizza in | Yes | Yes | Yes | Correctly identified pizza ovens |
+| Best appliances for a small apartment | Yes | Yes | Yes | Found relevant compact appliances |
+| Aquamarine appliance to make bread crispy | No | No | Yes | Found gas range, admits cannot confirm it colour is "Aquamarine" |
+
+### Key Observations
+
+Overall, the hybrid RAG pipeline performs well on semantic and medium difficulty queries but poorly on brand name lookups and general keyword queries. Fluency was consistently good across all 10 queries, the LLM produced human readable answers in every case. Accuracy and completeness dropped when the hybrid retriever returned with poor retrieved results since that was all the LLM could use to provide an answer.
+
+Strongest results came from semantic queries such as "Something to cook pizza in" and "kitchen device to heat food quickly", where the combination of BM25 and Semantic search together returned relevant specific products with good answer quality. The weakest results came from simple keyword queries like "Washing machine" where the hybrid pipeline resulted in obscure products that have very little reviews. This is most likely due to the dataset - it contains many low reviewed niche products that matched the hybrid search criteria and was unable to distinguish them from the more popular well known products or brands.
+
+### Limitations
+
+1. **Retrieval does not account for product quality or popularity**: The hybrid retriever only ranks products by how well they match the query, regardless of their review count. This means that a niche product with 1 review can rank above a well-known product with hundreds of reviews just because it matches the query well.
+
+2. **Brand name queries return accessories instead of main products**: Queries like "Magic bullet" and "Whirlpool" retrieved accessories and replacement parts instead of the brand's main products. Hybrid retriever does not distinguish between a product made by a brand and a product that is compatible with or named after the brand.
+
+### Suggestions for Future Improvements
+
+1. **Add minimum review count filter**: Pre-filtering out products with very few reviews before retrieval could improve result quality for general queries. This will prevent obscure niche products from dominating the results just because they match the query well.
+
+2. **Experiment with retrieval weight tuning**: The current equal weight of 0.5/0.5 weighting was chosen as a reasonable default but was not tested for performance. Running the same 10 queries from above with different weight combinations and comparing the answer quality could reveal if a different weight combination would improve results for this dataset.

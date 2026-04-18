@@ -19,13 +19,13 @@ sentence-transformers==5.4.0
 faiss-cpu==1.13.2
 
 # LLM / RAG
-langchain
-langchain-community
-langchain-huggingface
-langchain-openai
-langchain-groq
-tavily-python
-duckduckgo-search
+langchain==1.2.15
+langchain-community==0.4.1
+langchain-huggingface==1.2.2
+langchain-groq==1.1.2
+#langchain-openai==1.1.14
+#tavily-python==0.7.23
+#duckduckgo-search==8.1.1
 
 # utils
 python-dotenv==1.2.2
