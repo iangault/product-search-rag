@@ -259,7 +259,10 @@ if submitted and query:
                     row = df_by_asin.loc[parent_asin] if parent_asin in df_by_asin.index else None
                     if row is not None:
                         review_text = row.get("review_text", "N/A")
-                        if isinstance(review_text, str) and len(review_text) > 500:
-                            review_text = review_text[:500] + "..."
-                        st.text(review_text)
+                        if pd.isna(review_text) or not str(review_text, str):
+                            st.text("No review text available for this product.")
+                        else:
+                            if len(review_text) > 1000:
+                                review_text = review_text[:1000] + "..."
+                                st.text(review_text)
             st.divider()
