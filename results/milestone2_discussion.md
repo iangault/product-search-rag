@@ -3,6 +3,8 @@
 
 ## Model Choice
 
+The model chosen for the LLM pipeline is `qwen/qwen3-32b`, which is accessed through the Groq API. Qwen3 was chosen over the other suggested models (Phi-4, Mistral, Llama, etc) because it produced coherent answers grounded in retrieved product context. The Groq API was used because it offers a free inference tier, meaning the model runs on Groq's servers instead of locally. This is important since the 32B parameter model would require more GPU memory than a typical laptop would have available. The 32B size was the available Qwen3 option on Groq's free tier, and considering that larger models generally follow complex prompt constraints more reliably, it was a suitable choice for a product search assistant.
+
 ## Changes:
 
 It changes import_process.py to build one row per parent_asin, retain titled products from metadata even when they have no reviews, and add aggregated fields used by the app, including derived_avg_rating, n_reviews, candidate_review_title, candidate_review_text, and the selected review’s candidate_review_helpful_vote.
