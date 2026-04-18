@@ -10,11 +10,11 @@ This project builds a context-aware product search assistant using the Amazon Re
 
 ### Dataset Description
 
-For this project, we are using the Appliances category from the [Amazon Reviews 2023 dataset](https://amazon-reviews-2023.github.io) collected in 2023 by [McAuley Lab](https://cseweb.ucsd.edu/~jmcauley/). There are two different files available in this category: *User Reviews* containing reviews, star ratings, etc, and *Item Metadata* containing descriptions, price, and other features. The raw .json.gz files were loaded and merged together on `parent_asin` before undergoing text preprocessing (lowercasing and punctuation removal) to create a searchable corpus. Merging the files together would allow the retrieval system to match queries from both the product specifications and user reviews.
+For this project, we are using the Appliances category from the [Amazon Reviews 2023 dataset](https://amazon-reviews-2023.github.io) collected in 2023 by [McAuley Lab](https://cseweb.ucsd.edu/~jmcauley/). There are two different files available in this category: *User Reviews* containing reviews, star ratings, etc, and *Item Metadata* containing descriptions, price, and other features. The raw `.jsonl.gz` files are loaded, written to parquet, and merged together on `parent_asin` to create a searchable product-level corpus. BM25 query and document text are then tokenized with lowercasing, punctuation stripping, stopword removal, and stemming at retrieval time. Merging the files together allows the retrieval system to match queries from both the product specifications and user reviews.
 
 ### Retrieval Workflows
 
-Both BM25 and semantic search index the same set of metadata fields: `product_title`, `features`, `description`, `categories`, and `details`, so that comparisons between the two methods reflect differences in retrieval approach rather than differences in different corpuses.
+BM25 indexes `product_title`, `features`, `description`, `categories`, `details`, and `review_text`. Semantic search indexes `product_title`, `features`, `description`, `categories`, and `details`, excluding review text so the vector index stays focused on product metadata.
 
 BM25 search was performed using the [`rank_bm25`](https://pypi.org/project/rank-bm25/) package. Both the corpus and user queries are processed and tokenized before results are ranked based on a derivation of the TF-IDF (term frequency - inverse document frequency).
 
@@ -32,13 +32,13 @@ Semantic RAG uses a FAISS vector store built from chunked product documents to f
 
 ```mermaid
 flowchart TD
-    A[User Query] --> B[FAISS Vector Store Retriever]
-    B --> C[Top-5 relevant<br/>document chunks]
-    C --> D[relevant_text:<br/>build context block]
-    D --> E[build_prompt:<br/>system prompt +<br/>context + query]
+    A[User Query] --> B[Saved FAISS retriever<br/>data/processed/rag_faiss]
+    B --> C[Top-5 retrieved chunks]
+    C --> D[relevant_text:<br/>format chunk metadata + text]
+    D --> E[build_prompt:<br/>query + grounded context]
     E --> F[Qwen3-32B via Groq API]
-    F --> G[clean_response:<br/>strip thinking block]
-    G --> H[Display answer +<br/>supporting sources]
+    F --> G[clean_response:<br/>remove think block]
+    G --> H[Display answer +<br/>supporting source cards]
 ```
 
 #### Hybrid RAG
@@ -47,18 +47,20 @@ Hybrid RAG combines BM25 and semantic search results using Reciprocal Rank Fusio
 
 ```mermaid
 flowchart TD
-    A[User Query] --> B[BM25Search]
-    A --> C[SemanticSearch]
-    B --> D[Top-k BM25 results]
-    C --> E[Top-k Semantic results]
-    D --> F[HybridRetriever: Reciprocal<br/>Rank Fusion]
-    E --> F
-    F --> G[Ranked top-5 products]
-    G --> H[relevant_text_hybrid:<br/>build context block]
-    H --> I[build_prompt:<br/>system prompt +<br/>context + query]
-    I --> J[Qwen3-32B via Groq API]
-    J --> K[clean_response:<br/>strip thinking block]
-    K --> L[Display answer<br/>+ supporting sources]
+    A[User Query] --> B[BM25 index]
+    A --> C[Semantic index]
+    B --> D[BM25Search.retrieve]
+    C --> E[SemanticSearch.retrieve]
+    D --> F[Top results by parent_asin]
+    E --> G[Top results by parent_asin]
+    F --> H[HybridRetriever:<br/>Reciprocal Rank Fusion]
+    G --> H
+    H --> I[Top-5 fused products]
+    I --> J[relevant_text_hybrid:<br/>format product context]
+    J --> K[build_prompt:<br/>query + grounded context]
+    K --> L[Qwen3-32B via Groq API]
+    L --> M[clean_response:<br/>remove think block]
+    M --> N[Display answer +<br/>supporting product cards]
 ```
 
 ### Web App Features
@@ -71,7 +73,7 @@ To interact with the information retrieval systems, we developed a simple web ap
 
 * Detailed Search Results: For each retrieved product, the app displays the product title, a truncated review, the star rating, and the retrieval score for BM25 or Semantic search
 
-* RAG Answer Panel: In RAG mode and Hybrid RAG modes, the app generates a grounded answer and shows supporting product cards plus the retrieved chunk text used as evidence
+* RAG Answer Panel: In RAG mode and Hybrid RAG modes, the app generates a grounded answer and shows supporting product cards. RAG mode also shows the retrieved chunk text used as evidence, while Hybrid RAG shows product review context.
 
 ### Repository Structure
 
@@ -164,9 +166,9 @@ make help
 
 4. **Data Preparation and Indexing** To reproduce our results:
 
-    1. **Import and Pre-Processing** . Note: Do not commit this file to Github!
+    1. **Import and Pre-Processing**
 
-        a. Import the the raw meta data and review data from <https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw>
+        a. Import the raw metadata and review data from <https://mcauleylab.ucsd.edu/public_datasets/data/amazon_2023/raw>
         
         b. Merge datasets
         
@@ -180,9 +182,9 @@ make help
         make process
         ```
 
-    2. **EDA** Option step. Internal data exploration to inform analysis
+    2. **EDA** Optional step. Internal data exploration to inform analysis
 
-        a. Run all cells in `notebooks/milestone1_exploration.ipynb` to process raw data into `data/processed/merged.parquet`. (Part of Milestone 1)
+        a. Run all cells in `notebooks/milestone1_exploration.ipynb` for the earlier Milestone 1 exploration workflow.
 
         b. Run all cells in `notebooks/milestone2_exploration.ipynb` to explore `data/processed/processed.parquet` and confirm pre-processing steps taken in `import_process.py`. (Improvements made in Milestone 2)
 
@@ -212,11 +214,11 @@ make help
     make run
     ```
 
-    Once finished using the app, close the window in the browser, and in terminal press `cntl + c` to stop running the app.
+    Once finished using the app, close the window in the browser, and in terminal press `ctrl + c` to stop running the app.
 
-6. **Remove index data** in `data/processed/`:
+6. **Remove processed data and index artifacts** in `data/processed/`:
 
-    If wanting to confirm a clean state of index files, or reduce memory, before closing up the project.
+    If you want to return the project to a clean generated-data state before closing up the project.
 
     ``` bash
     make clean
