@@ -38,7 +38,7 @@ ipykernel==7.2.0
 #shiny
 #shinywidgets
 streamlit==1.56.0
-# torchvision==0.26.0
+torchvision==0.26.0
 
 # testing
 # pytest>=8.0.0
