@@ -18,7 +18,7 @@ Both BM25 and semantic search index the same set of metadata fields: `product_ti
 
 BM25 search was performed using the [`rank_bm25`](https://pypi.org/project/rank-bm25/) package. Both the corpus and user queries are processed and tokenized before results are ranked based on a derivation of the TF-IDF (term frequency - inverse document frequency).
 
-Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from the [`sentence-transformers`](https://huggingface.co/sentence-transformers) to generate document embeddings. These embeddings were then indexed using [FAISS](https://faiss.ai/index.html) (Facebook AI Similarity Search) to enable similarity searches. Cosine similarity was used to calculate vector similarity and results are retrieved using k-nearest neighbours.
+Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from the [`sentence-transformers`](https://huggingface.co/sentence-transformers) to generate document embeddings. Embedding generation automatically detects whether CUDA is available and otherwise falls back to CPU. These embeddings were then indexed using the CPU build of [FAISS](https://faiss.ai/index.html) (Facebook AI Similarity Search) to keep indexing and search portable across both CUDA-enabled machines and standard laptops. Cosine similarity was used to calculate vector similarity and results are retrieved using k-nearest neighbours.
 
 ### LLM Model
 

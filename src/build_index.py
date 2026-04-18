@@ -45,6 +45,17 @@ def main():
             "details",
             "review_text", # flattened aggregated review title and text
             ]
+    
+    # For semantic search, we are using one document without chunking
+    # The documents with review data becomes too big and crashing
+    # Therefore, we are excluding reviews from the semantic embeddings
+    # Because they also add noise to the actual metadata
+    semantic_cols = ["product_title",
+                     "features",
+                     "description",
+                     "categories",
+                     "details",
+                     ]
 
     bm25_docs = build_documents(df, cols)
     doc_ids = df["parent_asin"].tolist()
@@ -55,7 +66,7 @@ def main():
     # SemanticSearch
     print("Building semantic index...")
 
-    engine_sem = SemanticSearch(df, cols)
+    engine_sem = SemanticSearch(df, semantic_cols)
     engine_sem.save(index_path_sem)
 
 

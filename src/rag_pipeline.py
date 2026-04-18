@@ -5,6 +5,7 @@
 from pathlib import Path
 import pandas as pd
 import sys
+import torch
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -62,8 +63,14 @@ def clean_response(text):
 def get_embeddings():
     """Create the embedding model used to build the FAISS retriever."""
     return HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        model_kwargs={"device": get_torch_device()},
     )
+
+
+def get_torch_device():
+    """Return the safest available device for embedding generation."""
+    return "cuda" if torch.cuda.is_available() else "cpu"
 
 # Chunk document into smaller pieces
 # Documents are large based on milestone2_exploration.ipynb
