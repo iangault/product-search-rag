@@ -145,8 +145,10 @@ def main():
                     -- screen above.
                     COUNT(*) FILTER (WHERE has_review = 1) AS n_reviews,
                     -- Flatten review snippets into one searchable field
-                    -- for downstream retrieval and UI use.
-                    STRING_AGG(review_doc, ' ') FILTER (WHERE review_doc IS NOT NULL) AS review_text
+                    -- for downstream retrieval and UI use. Separate
+                    -- reviews with blank lines so the app can render
+                    -- them as distinct blocks.
+                    STRING_AGG(review_doc, '\n\n') FILTER (WHERE review_doc IS NOT NULL) AS review_text
                 FROM joined
                 GROUP BY
                     parent_asin,

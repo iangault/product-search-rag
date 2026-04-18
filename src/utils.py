@@ -83,10 +83,14 @@ def clean_html(text):
         return text
     
     # assisted by https://regex101.com to generate regex patterns 
-    text = re.sub(r"<br\s*/?>", " ", text) #replace <br> tags with space
+    text = re.sub(r"</?br\s*/?>", "\n", text) # replace common break tags with line breaks
     text = re.sub(r"\[\[VIDEOID:[^\]]*\]\]", "", text) #remove video ID tags
+    text = re.sub(r"<[^>]+>", " ", text) # remove any remaining simple HTML tags
+    text = re.sub(r"\n\s*\n+", "\n\n", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r" *\n *", "\n", text)
 
-    return text
+    return text.strip()
 
 def normalize(col):
     """Normalize mixed column values into readable strings.

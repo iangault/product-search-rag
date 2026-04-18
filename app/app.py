@@ -24,6 +24,7 @@ from src.rag_pipeline import (
     get_rag_index_version,
     load_retriever,
 )
+from src.utils import clean_html
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -118,6 +119,12 @@ with st.form("search_form"):
                           key = "search_query")
     submitted = st.form_submit_button("Search")
 
+def clean_display_text(value) -> str:
+    """Normalize review text for safe, readable UI display."""
+    if pd.isna(value):
+        return ""
+    return clean_html(str(value)).strip()
+
 # Debugging step to make sure old caches not held
 results_placeholder = st.empty()
 
@@ -191,17 +198,17 @@ if submitted and query:
             item_data = df_by_asin.loc[parent_asin].to_dict()
 
             # Candidate review to be displayed based on pre-processing step
-            review_title = item_data.get("candidate_review_title")
-            review_text = item_data.get("candidate_review_text")
+            review_title = clean_display_text(item_data.get("candidate_review_title"))
+            review_text = clean_display_text(item_data.get("candidate_review_text"))
 
             # Rebuild the candidate review snippet from whichever title/text
             # pieces are available so missing fields do not break display.
-            if pd.notna(review_title) and str(review_title).strip() and pd.notna(review_text) and str(review_text).strip():
+            if review_title and review_text:
                 review_display = f"{review_title}: {review_text}"
-            elif pd.notna(review_title) and str(review_title).strip():
-                review_display = str(review_title)
-            elif pd.notna(review_text) and str(review_text).strip():
-                review_display = str(review_text)
+            elif review_title:
+                review_display = review_title
+            elif review_text:
+                review_display = review_text
             else:
                 review_display = "No candidate review available."
 
@@ -256,22 +263,16 @@ if submitted and query:
                     None,
                 )
                 if matching_doc is not None:
-                    with st.expander("Show retrieved context"):
-                        st.text(matching_doc.page_content)
+                    with st.expander("Show retrieved chunk"):
+                        st.text(clean_display_text(matching_doc.page_content))
 
             elif search_mode == "Hybrid RAG":
-                with st.expander("Show retrieved context"):
+                with st.expander("Show product review context"):
                     row = df_by_asin.loc[parent_asin] if parent_asin in df_by_asin.index else None
                     if row is not None:
-                        review_text = row.get("review_text", "N/A")
-                        if pd.isna(review_text):
+                        review_text = clean_display_text(row.get("review_text"))
+                        if not review_text:
                             st.text("No review text available for this product.")
                         else:
-                            review_text = str(review_text).strip()
-                            if not review_text:
-                                st.text("No review text available for this product.")
-                            else:
-                                if len(review_text) > 1000:
-                                    review_text = review_text[:1000] + "..."
-                                st.text(review_text)
+                            st.text(review_text)
             st.divider()
