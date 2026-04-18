@@ -1,5 +1,9 @@
 # DSCI 575 Project: Amazon Product Search Assistant
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](environment.yml)
+[![Built with Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-ff4b4b.svg)](https://streamlit.io/)
+
 Authors: Christine Chow and Ian Gault
 
 GitHub Repository: [UBC-MDS/DSCI_575_project_gaultian_chrchow](https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow)
