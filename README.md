@@ -33,12 +33,12 @@ Semantic RAG uses a FAISS vector store built from chunked product documents to f
 ```mermaid
 flowchart TD
     A[User Query] --> B[FAISS Vector Store Retriever]
-    B --> C[Top-5 relevant document chunks]
-    C --> D[relevant_text: build context block]
-    D --> E[build_prompt: system prompt + context + query]
+    B --> C[Top-5 relevant<br/>document chunks]
+    C --> D[relevant_text:<br/>build context block]
+    D --> E[build_prompt:<br/>system prompt +<br/>context + query]
     E --> F[Qwen3-32B via Groq API]
-    F --> G[clean_response: strip thinking block]
-    G --> H[Display answer + supporting sources]
+    F --> G[clean_response:<br/>strip thinking block]
+    G --> H[Display answer +<br/>supporting sources]
 ```
 
 #### Hybrid RAG
@@ -51,14 +51,14 @@ flowchart TD
     A --> C[SemanticSearch]
     B --> D[Top-k BM25 results]
     C --> E[Top-k Semantic results]
-    D --> F[HybridRetriever: Reciprocal Rank Fusion]
+    D --> F[HybridRetriever: Reciprocal<br/>Rank Fusion]
     E --> F
     F --> G[Ranked top-5 products]
-    G --> H[relevant_text_hybrid: build context block]
-    H --> I[build_prompt: system prompt + context + query]
+    G --> H[relevant_text_hybrid:<br/>build context block]
+    H --> I[build_prompt:<br/>system prompt +<br/>context + query]
     I --> J[Qwen3-32B via Groq API]
-    J --> K[clean_response: strip thinking block]
-    K --> L[Display answer + supporting sources]
+    J --> K[clean_response:<br/>strip thinking block]
+    K --> L[Display answer<br/>+ supporting sources]
 ```
 
 ### Web App Features
