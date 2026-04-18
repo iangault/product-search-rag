@@ -32,7 +32,10 @@ Semantic RAG uses a FAISS vector store built from chunked product documents to f
 
 ```mermaid
 flowchart TD
-    A[User Query] --> B[Saved FAISS retriever<br/>data/processed/rag_faiss]
+    P[processed.parquet] --> Q[build_documents<br/>src/utils.py]
+    Q --> R[normalize + clean_html<br/>flatten text and strip HTML]
+    R --> B[Saved FAISS retriever<br/>data/processed/rag_faiss]
+    A[User Query] --> B
     B --> C[Top-5 retrieved chunks]
     C --> D[relevant_text:<br/>format chunk metadata + text]
     D --> E[build_prompt:<br/>query + grounded context]
@@ -47,8 +50,12 @@ Hybrid RAG combines BM25 and semantic search results using Reciprocal Rank Fusio
 
 ```mermaid
 flowchart TD
-    A[User Query] --> B[BM25 index]
-    A --> C[Semantic index]
+    P[processed.parquet] --> Q[build_documents<br/>src/utils.py]
+    Q --> R[normalize + clean_html<br/>flatten text and strip HTML]
+    R --> B[BM25 index]
+    R --> C[Semantic index]
+    A[User Query] --> B
+    A --> C
     B --> D[BM25Search.retrieve]
     C --> E[SemanticSearch.retrieve]
     D --> F[Top results by parent_asin]
@@ -109,6 +116,7 @@ DSCI_575_project_gaultian_chrchow/
 │   └── utils.py
 │       Utility helpers used by retrieval:
 │       - `text_preprocessor`: tokenization, stopword removal, and stemming for BM25
+│       - `clean_html`: strips HTML tags and normalizes display text
 │       - `normalize`: converts strings, lists, and dicts into plain text
 │       - `build_documents`: combines selected columns into one searchable document per row
 │
