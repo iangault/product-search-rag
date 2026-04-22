@@ -258,13 +258,15 @@ make help
 
         This writes `data/eval/retrieval_labels.csv`. Fill the `relevant` column with `yes` or `no` for every pooled candidate row.
 
+        This step is intended to create the labeling file before human review. Once `retrieval_labels.csv` has already been judged and finalized, do not rerun `make build-eval-set`, or you may overwrite or conflict with the judged evaluation set you want to preserve.
+
     6.  **Run retrieval evaluation:** after labeling every pooled candidate, evaluate BM25, semantic, and hybrid retrieval quantitatively with `precision@k`, `recall@k`, and `MRR`.
 
         ```bash
         make eval-retrieval
         ```
 
-        Results are written to `results/retrieval_eval_results.json`.
+        This is the command to use for presenting quantitative evaluation results after the human judgments are complete. It reads the judged `data/eval/retrieval_labels.csv` file and writes summary and per-query metrics to `results/retrieval_eval_results.json`.
 
 7.  **Running the Web App** Launch the Streamlit dashboard:
 
@@ -282,7 +284,7 @@ make help
     make clean
     ```
 
-To run the full pipeline of `make clean`, `make process`, `make build-ir`, `make build-rag`, and `make run`:
+To run the essential steps of the full pipeline `make clean`, `make process`, `make build-ir`, `make build-rag`, and `make run`:
 
 ``` bash
 make all
