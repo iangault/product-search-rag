@@ -212,4 +212,7 @@ data/raw/*
 
 # Ignore large processed artifact
 data/processed/*
+!data/processed/.gitkeep
 
+# Ignore system file
+.DS_Store
