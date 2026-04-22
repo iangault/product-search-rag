@@ -82,6 +82,8 @@ To interact with the information retrieval systems, we developed a simple web ap
 
 * RAG Answer Panel: In RAG mode and Hybrid RAG modes, the app generates a grounded answer and shows supporting product cards. RAG mode also shows the retrieved chunk text used as evidence, while Hybrid RAG shows product review context.
 
+* Out-of-scope query guardrail in RAG modes using LLM-based query filtering to reject queries unrelated to Amazon appliances, kitchen products, or product shopping.
+
 ### Repository Structure
 
 BM25, semantic retrieval, and RAG components are defined in `src/` and built through separate indexing scripts.

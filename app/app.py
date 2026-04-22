@@ -24,6 +24,7 @@ from src.rag_pipeline import (
     get_rag_index_version,
     load_retriever,
 )
+from src.prompts import is_query_relevant
 from src.utils import clean_html
 
 from dotenv import load_dotenv
@@ -153,6 +154,9 @@ if submitted and query:
             retrieved_docs = []
         
         elif search_mode == "Hybrid RAG":
+            if not is_query_relevant(query, hybrid_llm):
+                st.warning("Your query does not appear to be related to Amazon appliances, kitchen products, or product shopping. Please try a different query.")
+                st.stop()
             rag_answer, results = answer_query_hybrid(
                 query,
                 df_by_asin=df_by_asin,
@@ -169,7 +173,9 @@ if submitted and query:
             if rag_retriever is None or rag_llm is None:
                 st.error("RAG index not found. Run `python src/build_rag.py` or `make build-rag` first.")
                 st.stop()
-
+            if not is_query_relevant(query, rag_llm):
+                st.warning("Your query does not appear to be related to Amazon appliances, kitchen products, or product shopping. Please try a different query.")
+                st.stop()
             rag_answer, retrieved_docs = answer_query(
                 query,
                 retriever=rag_retriever,
