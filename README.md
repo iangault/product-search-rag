@@ -187,16 +187,16 @@ make help
 
     i. Create or Prune the Conda environment:
 
-        ```bash
+
         make create
         make prune
-        ```
+
 
     ii. Activate the Conda environment:
 
-        ```bash
+
         conda activate 575_proj
-        ```
+
 
 3.  **Environment Variables** Create an `.env` file in root directory. Note: Do not commit this file to Github!
 
@@ -266,7 +266,7 @@ make help
 
         This is the command to use for presenting quantitative evaluation results after the human judgments are complete. It reads the judged `data/eval/retrieval_labels.csv` file and writes summary and per-query metrics to `results/retrieval_eval_results.json`.
 
-7.  **Running the Web App** Launch the Streamlit dashboard:
+5.  **Running the Web App** Launch the Streamlit dashboard:
 
     ```bash
     make run
@@ -274,7 +274,7 @@ make help
 
     Once finished using the app, close the window in the browser, and in terminal press `ctrl + c` to stop running the app.
 
-8. **Remove processed data and index artifacts** in `data/processed/`:
+6. **Remove processed data and index artifacts** in `data/processed/`:
 
     If you want to return the project to a clean generated-data state before closing up the project.
 
