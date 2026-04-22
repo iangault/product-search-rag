@@ -1,4 +1,9 @@
 """
+Title: Build Retrieval Labels
+Purpose: Generate a pooled manual-labeling file for retrieval evaluation by
+combining BM25, semantic, and hybrid candidates.
+Date: 2026-04-22
+
 Notes
 - Codex was used to help brainstorm the purpose of this script and draft it.
 - We used a custom script-based approach rather than a RADAS workflow because

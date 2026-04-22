@@ -1,4 +1,8 @@
-# Utility Functions for Project
+# Title: Utility Helpers
+# Purpose: Provide shared text cleaning, normalization, and
+# document-building helpers used across retrieval scripts.
+# Date: 2026-04-22
+# NOTE: adapted from 563_lab3 preprocess.py
 
 import nltk
 from nltk.corpus import stopwords
@@ -7,7 +11,7 @@ import string
 import re
 import html
 
-# adapted from 563_lab3 preprocess.py
+
 # download only if not present
 try:
     nltk.data.find("corpora/stopwords")

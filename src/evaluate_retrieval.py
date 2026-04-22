@@ -1,4 +1,9 @@
 """
+Title: Evaluate Retrieval
+Purpose: Score BM25, semantic, and hybrid retrieval against labeled relevance
+judgments using ranking metrics.
+Date: 2026-04-22
+
 Notes
 - Codex was used to help brainstorm and draft this script.
 - This script evaluates the retrieval component of the system using manually

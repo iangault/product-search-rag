@@ -1,4 +1,7 @@
-# Script for prompts
+# Title: Prompt Templates
+# Purpose: Store prompt text and prompt-building helpers for the
+# RAG answer generation step.
+# Date: 2026-04-22
 
 SYSTEM_PROMPT = """
     You are a helpful Amazon shopping assistant.

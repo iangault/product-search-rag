@@ -1,4 +1,7 @@
-# RAG pipeline
+# Title: RAG Pipeline
+# Purpose: Build retrieval context and generate grounded answers
+# for the app's RAG modes.
+# Date: 2026-04-22
 # NOTE: codex was used for brainstorming, debugging,
 # and making code more efficient
 

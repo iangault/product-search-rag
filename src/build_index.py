@@ -1,4 +1,7 @@
-# Script to build BM25 and Semantic Search indices
+# Title: Build IR Indexes
+# Purpose: Create and save the BM25 and semantic search indexes from
+# processed product data.
+# Date: 2026-04-22
 
 import sys
 from pathlib import Path

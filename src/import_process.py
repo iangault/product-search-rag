@@ -1,4 +1,7 @@
-# Script to import meta and review datasets and process them to be inputs
+# Title: Import and Process Data
+# Purpose: Download, merge, and preprocess Amazon metadata and
+# review data into parquet files for retrieval.
+# Date: 2026-04-22
 
 from pathlib import Path
 import duckdb
