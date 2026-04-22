@@ -6,14 +6,11 @@ pyarrow==23.0.1
 nltk==3.9.4
 
 # viz
-#matplotlib
-#plotly
 altair==6.0.0
 vegafusion==2.0.3
 vl-convert-python==1.9.0.post1
 
 # ML
-#scikit-learn
 rank-bm25==0.2.2
 torch
 sentence-transformers==5.4.0
@@ -24,9 +21,6 @@ langchain==1.2.15
 langchain-community==0.4.1
 langchain-huggingface==1.2.2
 langchain-groq==1.1.2
-#langchain-openai==1.1.14
-#tavily-python==0.7.23
-#duckduckgo-search==8.1.1
 
 # utils
 python-dotenv==1.2.2
@@ -35,11 +29,5 @@ jupyter==1.1.1
 ipykernel==7.2.0
 
 # apps
-#shiny
-#shinywidgets
 streamlit==1.56.0
-torchvision==0.26.0
-
-# testing
-# pytest>=8.0.0
-# pytest-playwright>=0.5.0
+torchvision==0.26.0 # required for streamlit
