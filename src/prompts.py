@@ -3,6 +3,8 @@
 # RAG answer generation step.
 # Date: 2026-04-22
 
+import re
+
 SYSTEM_PROMPT = """
     You are a helpful Amazon shopping assistant.
     Answer the question using ONLY the following context (real product reviews + metadata).
@@ -38,5 +40,8 @@ def is_query_relevant(query, llm):
     Use the guardrail prompt to determine if query is relevant to the Amazon shopping assistant. Returns True if query is approved, False if rejected. Uses LLM to classify query before retrieval is attempted.
     """
     prompt = GUARDRAIL_PROMPT.format(query=query)
-    response = llm.invoke(prompt).content.strip().upper()
-    return response.startswith("APPROVED") #returns True if approved
+    raw = llm.invoke(prompt).content
+
+    # claude code was used for debugging the logic of guardrail prompt, to strip Qwen3-32B thinking block to get clean "APPROVED" or "REJECTED" response.
+    clean = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip().upper()
+    return clean.startswith("APPROVED") #returns True if approved
