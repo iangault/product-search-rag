@@ -103,7 +103,6 @@ DSCI_575_project_gaultian_chrchow/
 │   │   - `retrieval_labels.csv`
 │   └── processed/
 │       Processed data and saved retrieval indexes used by the app.
-│       - `merged.parquet`
 │       - `processed.parquet`
 │       - `bm25_index.pkl`
 │       - `semantic.index`
@@ -145,8 +144,7 @@ DSCI_575_project_gaultian_chrchow/
 │
 ├── results/
 │   Project discussion notes, workflow diagrams, and retrieval evaluation outputs.
-│   - `flow_chart_1.md`
-│   - `flow_chart_2.md`
+│   - `final_discussion.md`
 │   - `milestone1_discussion.md`
 │   - `milestone2_discussion.md`
 │   - `retrieval_eval_results.json`

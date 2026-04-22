@@ -223,7 +223,10 @@ Summary of `README` improvements:
 
 ### Code Quality Changes
 
-- Summary of cleanups
+- Docstrings were confirmed as being present
+- Titles and purpose were added to each script
+- Unnecessary files for final presentation were removed, including: flow charts for internal use and an old processed file used in Milestone 1 (`merged.parquet`)
+- A quality control review of all scripts were made
 
 ## Step 4: Cloud Deployment Plan
 

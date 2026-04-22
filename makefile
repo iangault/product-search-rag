@@ -72,6 +72,7 @@ all: clean process build-ir build-rag run
 # Clean processed data and saved retrieval artifacts
 clean:
 	@echo -e "$(YELLOW)Cleaning processed data and retrieval artifacts...$(RESET)"
+	@rm -f data/processed/merged.parquet
 	@rm -f data/processed/processed.parquet
 	@rm -f data/processed/bm25_index.pkl
 	@rm -f data/processed/semantic.ids.npy
