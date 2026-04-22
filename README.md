@@ -254,9 +254,9 @@ make help
         make build-eval-set
         ```
 
-        This writes `data/eval/retrieval_labels.csv`. Fill the `relevant` column with `yes` or `no` for every pooled candidate row.
+        This writes `data/eval/retrieval_labels.csv`. Manually fill the `relevant` column with `yes` or `no` for every pooled candidate row.
 
-        This step is intended to create the labeling file before human review. Once `retrieval_labels.csv` has already been judged and finalized, do not rerun `make build-eval-set`, or you may overwrite or conflict with the judged evaluation set you want to preserve.
+        This step is intended to create the labeling file before human review. If `retrieval_labels.csv` already exists, the script will stop rather than overwrite it. To intentionally replace the file (warning: do not do), run `python src/build_retrieval_labels.py --force`.
 
     6.  **Run retrieval evaluation:** after labeling every pooled candidate, evaluate BM25, semantic, and hybrid retrieval quantitatively with `precision@k`, `recall@k`, and `MRR`.
 
