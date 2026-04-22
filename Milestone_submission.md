@@ -2,7 +2,7 @@
 
 Authors: Christine Chow, Ian Gault
 
-April 18, 2026
+April 22, 2026
 
-https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow/releases/tag/v0.2.0
+https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow/releases/tag/v0.3.0
 

@@ -1,12 +1,17 @@
-# Utility Functions for Project
+# Title: Utility Helpers
+# Purpose: Provide shared text cleaning, normalization, and
+# document-building helpers used across retrieval scripts.
+# Date: 2026-04-22
+# NOTE: adapted from 563_lab3 preprocess.py
 
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer # suffix stripping
 import string
 import re
+import html
 
-# adapted from 563_lab3 preprocess.py
+
 # download only if not present
 try:
     nltk.data.find("corpora/stopwords")
@@ -86,6 +91,7 @@ def clean_html(text):
     text = re.sub(r"</?br\s*/?>", "\n", text) # replace common break tags with line breaks
     text = re.sub(r"\[\[VIDEOID:[^\]]*\]\]", "", text) #remove video ID tags
     text = re.sub(r"<[^>]+>", " ", text) # remove any remaining simple HTML tags
+    text = html.unescape(text) # decode HTML &#34 entities into chars, suggested by https://stackoverflow.com/questions/65833681/
     text = re.sub(r"\n\s*\n+", "\n\n", text)
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r" *\n *", "\n", text)

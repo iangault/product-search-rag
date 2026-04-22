@@ -1,5 +1,9 @@
-# adapted from 575_lec05 "comparison between BM25 and embedding-based search"
-# Note: debugged by codex to incorporate parent_asin at index id
+# Title: BM25 Retrieval
+# Purpose: Build, save, load, and query a BM25 search index over product text.
+# Date: 2026-04-22
+# NOTE:
+# - Adapted from 575_lec05 "comparison between BM25 and embedding-based search"
+# - debugged by codex to incorporate parent_asin at index id
 
 from rank_bm25 import BM25Okapi
 from src.utils import text_preprocessor

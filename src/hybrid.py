@@ -1,3 +1,8 @@
+# Title: Hybrid Retrieval
+# Purpose: Combine BM25 and semantic rankings into a single ranked list
+# using reciprocal rank fusion.
+# Date: 2026-04-22
+
 from src.bm25 import BM25Search
 from src.semantic import SemanticSearch
 

@@ -1,3 +1,8 @@
+# Title: Semantic Retrieval
+# Purpose: Build, save, load, and query the embedding-based semantic
+# search index.
+# Date: 2026-04-22
+
 from pathlib import Path
 import numpy as np
 import os
@@ -5,14 +10,15 @@ import torch
 from sentence_transformers import SentenceTransformer
 from src.utils import build_documents
 
-# NOTE: Brainstorming with ChatGBT5 was done to develop the class
-# and learn about new packages
-# Debugged with codex to index based on `parent_asin` and CUDA
+# NOTE:
+# - Brainstorming with ChatGBT5 was done to develop the class
+# and learn about new packages.
+# - Debugged with codex to index based on `parent_asin` and CUDA
+# - No longer using review data for semantic search only
+# - With metadata, still need to run in batches
+# now that we are explicitly choosing the safest device
+# to run the code on.
 
-# No longer using review data
-# With metadata still need to run in batches
-# Now that we can explicitly choosing the safest device
-# to run the code
 MAX_SEMANTIC_DOC_CHARS = 8000
 SEMANTIC_BATCH_SIZE = 8
 SEMANTIC_ENCODE_CHUNK_SIZE = 1000

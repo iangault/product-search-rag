@@ -1,4 +1,6 @@
-# Build RAG to make the app run more efficiently
+# Title: Build RAG Index
+# Purpose: Build and save the vector store used by the RAG pipeline in the app.
+# Date: 2026-04-22
 # NOTE: codex was used to extract functions from rag_pipeline
 
 import sys

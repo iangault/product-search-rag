@@ -86,6 +86,8 @@ To interact with the information retrieval systems, we developed a simple web ap
 
 * RAG Answer Panel: In RAG mode and Hybrid RAG modes, the app generates a grounded answer and shows supporting product cards. RAG mode also shows the retrieved chunk text used as evidence, while Hybrid RAG shows product review context.
 
+* Out-of-scope query guardrail in RAG modes using LLM-based query filtering to reject queries unrelated to Amazon appliances, kitchen products, or product shopping.
+
 ### Repository Structure
 
 BM25, semantic retrieval, and RAG components are defined in `src/` and built through separate indexing scripts.
@@ -98,23 +100,39 @@ DSCI_575_project_gaultian_chrchow/
 │
 ├── data/
 │   ├── raw/
-│   │   Original input data files.
+│   │   Raw parquet inputs created from the Amazon metadata and review source files.
+│   │   - `meta_raw.parquet`
+│   │   - `reviews_raw.parquet`
+│   ├── eval/
+│   │   Evaluation queries and manual relevance labels for retrieval evaluation.
+│   │   - `retrieval_queries.json`
+│   │   - `retrieval_labels.csv`
 │   └── processed/
 │       Processed data and saved retrieval indexes used by the app.
+│       - `processed.parquet`
+│       - `bm25_index.pkl`
+│       - `semantic.index`
+│       - `semantic.ids.npy`
 │
 ├── src/
 │   ├── bm25.py
 │   │   BM25 retrieval class, including index building, searching, saving, and loading.
+│   ├── import_process.py
+│   │   Imports raw source data, merges metadata and reviews, and writes processed parquet files.
 │   ├── semantic.py
 │   │   Semantic retrieval class using SentenceTransformers and FAISS.
 │   ├── build_index.py
 │   │   Script to build and save BM25 and semantic search indexes from the processed dataset.
-│   ├── rag_pipeline.py
-│   │   RAG retrieval, prompt-building, and answer-generation helpers.
-│   ├── hybrid.py
-│   │   Hybrid retriever class combining BM25 and semantic search using Reciprocal Rank Fusion (RRF).
 │   ├── build_rag.py
 │   │   Script to build and save the FAISS index used by the RAG pipeline.
+│   ├── hybrid.py
+│   │   Hybrid retriever class combining BM25 and semantic search using Reciprocal Rank Fusion (RRF).
+│   ├── rag_pipeline.py
+│   │   RAG retrieval, prompt-building, and answer-generation helpers.
+│   ├── build_retrieval_labels.py
+│   │   Pools BM25, semantic, and hybrid results into a CSV for human relevance labeling.
+│   ├── evaluate_retrieval.py
+│   │   Quantitative retrieval evaluation for BM25, semantic, and hybrid search using human-labeled precision@k, recall@k, and MRR.
 │   ├── prompts.py
 │   │   Prompt template helpers for the RAG answer generation step.
 │   └── utils.py
@@ -126,6 +144,16 @@ DSCI_575_project_gaultian_chrchow/
 │
 ├── notebooks/
 │   Project notebooks for EDA, preprocessing, and experimentation.
+│   - `milestone1_exploration.ipynb`
+│   - `milestone2_exploration.ipynb`
+│   - `milestone2_rag.ipynb`
+│
+├── results/
+│   Project discussion notes, workflow diagrams, and retrieval evaluation outputs.
+│   - `final_discussion.md`
+│   - `milestone1_discussion.md`
+│   - `milestone2_discussion.md`
+│   - `retrieval_eval_results.json`
 │
 ├── requirements.txt
 │   Python package requirements.
@@ -133,11 +161,17 @@ DSCI_575_project_gaultian_chrchow/
 ├── environment.yml
 │   Conda environment specification for reproducing the project setup.
 │
+├── makefile
+│   Convenience commands for environment setup, preprocessing, indexing, evaluation, app launch, and cleanup.
+│
+├── Milestone_submission.md
+│   Submission-specific project summary and milestone notes.
+│
 ├── README.md
 │   Project overview, setup instructions, and usage documentation.
 │
-└── Makefile
-    Convenience commands for environment setup, index building, app launch, and cleanup.
+└── LICENSE
+    Project license.
 ```
 
 ### Installation and Setup
@@ -159,16 +193,16 @@ make help
 
     i. Create or Prune the Conda environment:
 
-        ```bash
+
         make create
         make prune
-        ```
+
 
     ii. Activate the Conda environment:
 
-        ```bash
+
         conda activate 575_proj
-        ```
+
 
 3.  **Environment Variables** Create an `.env` file in root directory. Note: Do not commit this file to Github!
 
@@ -236,8 +270,34 @@ make help
     make clean
     ```
 
-To run the full pipeline of `make clean`, `make process`, `make build-ir`, `make build-rag`, and `make run`:
+To run the essential steps of the full pipeline `make clean`, `make process`, `make build-ir`, `make build-rag`, and `make run`:
 
 ``` bash
 make all
 ```
+
+7. **RAG Retrieval Evaluation**
+
+    We used a custom script-based approach rather than a RADAS workflow because the goal here was to evaluate the information retrieval component of the RAG system without introducing an LLM into the labelling pipeline itself.
+
+    1. **Build a manual retrieval labeling set:** pool top candidates from BM25, semantic, and hybrid search into a CSV for human relevance judgments.
+
+        ```bash
+        make build-eval-set
+        ```
+
+    This writes `data/eval/retrieval_labels.csv`. Manually fill the `relevant` column with `yes` or `no` for every pooled candidate row.
+
+    This step is intended to create the labeling file before human review. If `retrieval_labels.csv` already exists, the script will stop rather than overwrite it. To intentionally replace the file (warning: do not do), run `python src/build_retrieval_labels.py --force`.
+
+    2.  **Run retrieval evaluation:** after labeling every pooled candidate, evaluate BM25, semantic, and hybrid retrieval quantitatively with `precision@k`, `recall@k`, and `MRR`.
+
+        ```bash
+        make eval-retrieval
+        ```
+
+    This is the command to use for presenting quantitative evaluation results after the human judgments are complete. It reads the judged `data/eval/retrieval_labels.csv` file and writes summary and per-query metrics to `results/retrieval_eval_results.json`.
+
+    Each of the 10 tested queries can be biased towards BM25 or Semantic interpretation. Therefore, the terminal-based output after running this command shows the average scores across quieries. This gives a more fair evaluation to the retrieval method itself.
+
+    The summary results are shared in `final_discussion.md`.
