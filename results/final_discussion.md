@@ -220,16 +220,18 @@ Summary of `README` improvements:
 - Updated the mermaid file structure based on the additional feature
 - Updated the makefile to include controls for the new feature
 - Added documentation for the custom Quantitative Evaluation feature
+- Added out-of-scope query guardrail in RAG modes using LLM-based query filtering
 
 ### Code Quality Changes
 
 - Docstrings were confirmed as being present
 - Titles and purpose were added to each script
-- Unnecessary files for final presentation were removed, including: flow charts for internal use and an old processed file used in Milestone 1 (`merged.parquet`)
+- Unnecessary files for final presentation were removed, including: flow charts for internal use and an old processed file used in Milestone 1 (`data/processed/merged.parquet`)
 - A quality control review of all scripts were made
-- Updated `utils.py` to decode html entities in product review text [html.unescape() to clean_html()] and confirmed it works in streamlit hybrid rag search with 'steam oven'; no longer has &#34 in the context.
-- Removed unused imports in milestone2_rag.ipynb
-- Updated .gitignore to include .DS_store
+- Updated `src/utils.py` to decode html entities in product review text [`html.unescape()` to `clean_html()`] and confirmed it works in streamlit hybrid rag search with 'steam oven'; no longer has &#34 in the context.
+- Removed unused imports in `notebooks/milestone2_rag.ipynb`
+- Updated `.gitignore` to include .DS_Store
+- Added out-of-scope query guardrail (`is_query_relevant()` in `src/prompts.py`) called in RAG modes in `app/app.py` before retrieval is attempted
 
 ## Step 4: Cloud Deployment Plan
 
@@ -238,10 +240,12 @@ We would deploy our Amazon Appliances Search engine on AWS using the following a
 Plan informed by tutorial: https://github.com/upendrak/streamlit-aws-tutorial
 
 **Data storage**:
-- Raw data: S3 bucket with versioning enabled, so that we could regularly receiving new incoming data
+- AWS S3 bucket chosen for both data and index storage for cost-effectiveness for storing large infrequently accessed files
+- Raw data: S3 bucket with versioning enabled, so that we could regularly receive new incoming data
 - Processed data: S3 bucket, and rebuilt when new raw data arrives
 - Vector index: S3 bucket
 - BM25 index: S3 bucket
+- At app startup, EC instance will load BM25 index and vector index from S3 into memory, which will persist in memory for the duration of the session. These indices are reloaded when app restarts or new indices are pushed.
 
 **Compute**:
 - Launch an AWS EC2 instance hosting the Streamlit app
