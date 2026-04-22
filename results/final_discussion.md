@@ -219,7 +219,7 @@ Summary of `README` improvements:
 
 - Updated the mermaid file structure based on the additional feature
 - Updated the makefile to include controls for the new feature
-- Added document in the custom Quantitative Evaluation feature
+- Added documentation for the custom Quantitative Evaluation feature
 
 ### Code Quality Changes
 
@@ -227,7 +227,48 @@ Summary of `README` improvements:
 - Titles and purpose were added to each script
 - Unnecessary files for final presentation were removed, including: flow charts for internal use and an old processed file used in Milestone 1 (`merged.parquet`)
 - A quality control review of all scripts were made
+- Updated `utils.py` to decode html entities in product review text [html.unescape() to clean_html()] and confirmed it works in streamlit hybrid rag search with 'steam oven'; no longer has &#34 in the context.
+- Removed unused imports in milestone2_rag.ipynb
+- Uupdated .gitignore to include .DS_store
 
 ## Step 4: Cloud Deployment Plan
 
-(See Step 4 above for required subsections)
+We would deploy our Amazon Appliances Search engine on AWS using the following architecture:
+
+Plan informed by tutorial: https://github.com/upendrak/streamlit-aws-tutorial
+
+**Data storage**:
+- Raw data: S3 bucket with versioning enabled, so that we could regularly receiving new incoming data
+- Processed data: S3 bucket, and rebuilt when new raw data arrives
+- Vector index: S3 bucket
+- BM25 index: S3 bucket
+
+**Compute**:
+- Launch an AWS EC2 instance hosting the Streamlit app
+- Expose the custom Streamlit port: port 8501
+- Concurrency: Streamlit handles multiple users if on a small scale
+- Based on size of app and growth of dataset would need to adjust the size of the EC2 as needed; currently, would only need to scale up to one EC2, but if demand increases, would need to either scale up or scale out
+
+**LLM inference**
+- Base on LLM functionality so far, would use Groq API for LLM inference, rather than hosting own model on AWS
+- Avoids managing GPU infrastructure, and simplifies scaling because outsourcing to API provider
+- Pipeline: Retrieval in app, generation through Groq API
+
+**Streaming/Updates**:
+
+This would require two streams, as highlighted below. An important caveat would be for necessary edge-cases, checks on newly fetched data, and testing before updates are pushed into production.
+
+a) *Updates to Code*
+
+- Connect AWS EC2 instance to Github: allow for AWS deployment tooling rather than manual SSH access
+- Set up Github actions in .github/workflows for testing
+- If successful, trigger deployment to EC2 through AWS CodeDeploy
+- Pipeline: push to Githun repo -> actions run -> deploy updated app to AWS
+
+b) *Updates to Data*
+
+- Our pipeline starts with pulling data from an external website URL; this means, the compilers of the data could technically update or make changes to it under the same URL
+- AWS EventBridge Scheduler: managed service to schedule recurring refresh jobs.
+- Would schedule to fetch new data on a monthly basis
+- Triggers pipeline to rebuild artifacts (processed.parquet, BM25 and vector indices) and updated on S3
+- Use AWS EventBridge Scheduler to set up job on EC2, launching the app using the latest version from S3
