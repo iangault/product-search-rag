@@ -1,0 +1,875 @@
+{
+  "metadata": {
+    "k": 5,
+    "labels_path": "/Users/iangault/git/MDS/575_advanced_ML/DSCI_575_project_gaultian_chrchow/data/eval/retrieval_labels.csv",
+    "bm25_index": "/Users/iangault/git/MDS/575_advanced_ML/DSCI_575_project_gaultian_chrchow/data/processed/bm25_index.pkl",
+    "semantic_index": "/Users/iangault/git/MDS/575_advanced_ML/DSCI_575_project_gaultian_chrchow/data/processed/semantic.index"
+  },
+  "bm25": {
+    "summary": {
+      "retriever": "bm25",
+      "num_queries": 10,
+      "mean_precision@5": 0.54,
+      "mean_recall@5": 0.3324,
+      "mrr": 0.725
+    },
+    "per_query": [
+      {
+        "query": "Washing machine",
+        "relevant_asins": [
+          "B006BYHPKW",
+          "B00DJF6296",
+          "B00KYFJPFM",
+          "B07Q4VTTL9",
+          "B08FMND788",
+          "B08VDZBPR7",
+          "B08Y5QWGKS",
+          "B099NDZ8WC",
+          "B09L1LHFP8",
+          "B09P515RCX",
+          "B09TT5HQH8",
+          "B09VT3BS1G",
+          "B0B4P6G5QR",
+          "B0BLY369X3",
+          "B0BWBF4MN1",
+          "B0C2K7C29Z"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B09NRGSZM8",
+          "B08FMND788",
+          "B09VT3BS1G",
+          "B09L1LHFP8",
+          "B00KYFJPFM"
+        ],
+        "precision@5": 0.8,
+        "recall@5": 0.25,
+        "reciprocal_rank": 0.5
+      },
+      {
+        "query": "Stainless steel coffee maker",
+        "relevant_asins": [
+          "B00WT80GUU",
+          "B01N8XTE7J",
+          "B07D6L2QX2",
+          "B07X7MH6BG",
+          "B08BC23D68",
+          "B08FBDWXT5",
+          "B08FBFCSRQ",
+          "B0BCW332JG",
+          "B0BHTY25D2"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B07X7MH6BG",
+          "B0BHTY25D2",
+          "B01N8XTE7J",
+          "B0BCW332JG",
+          "B09QKY4JVC"
+        ],
+        "precision@5": 0.8,
+        "recall@5": 0.4444,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Replacement Parts DC61-02610A",
+        "relevant_asins": [
+          "B07SQ7TK58",
+          "B07T6CW9JH",
+          "B07X3875ZN",
+          "B07YPXWPSC",
+          "B07ZP6S236",
+          "B082XX6LTN",
+          "B08LVGGZFV",
+          "B08RYGY4HT",
+          "B08VS5296N",
+          "B08Y5JZCN3"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B082XX6LTN",
+          "B08Y5JZCN3",
+          "B07T6CW9JH",
+          "B08VS5296N",
+          "B07ZP6S236"
+        ],
+        "precision@5": 1.0,
+        "recall@5": 0.5,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Magic bullet",
+        "relevant_asins": [
+          "B01C855CYS"
+        ],
+        "num_judged": 18,
+        "retrieved_asins": [
+          "B01C855CYS",
+          "B0BPSFXZ1P",
+          "B08JC5T59B",
+          "B07D7C7VMT",
+          "B0C6KMX4MR"
+        ],
+        "precision@5": 0.2,
+        "recall@5": 1.0,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Whirlpool",
+        "relevant_asins": [
+          "B001DHKBP8",
+          "B001DPPE4S",
+          "B002ZNE8QM",
+          "B004Q3TXU0",
+          "B0050KJUE2",
+          "B005S4F96I",
+          "B008DJLQOY",
+          "B008DJLTGY",
+          "B0096OME8M",
+          "B009AV4D44",
+          "B00ECV2Y48",
+          "B00J8HV3ZC",
+          "B00LQDFZ0U",
+          "B072YV44XT",
+          "B073DFZGNV"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B086G4WWZB",
+          "B016NCF5OE",
+          "B086GH9HXG",
+          "B00ECV2Y48",
+          "B00LQDFZ0U"
+        ],
+        "precision@5": 0.4,
+        "recall@5": 0.1333,
+        "reciprocal_rank": 0.25
+      },
+      {
+        "query": "Washingmachine",
+        "relevant_asins": [
+          "B00DJF6296",
+          "B08CR3D5B6",
+          "B08FMND788",
+          "B08VDZBPR7",
+          "B08WK97GXF",
+          "B08Y5QWGKS",
+          "B094NB68J9",
+          "B0BLY369X3",
+          "B0BWBF4MN1"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B01GOYBVAS",
+          "B07BYNV7ZV",
+          "B01KJ2FVFW",
+          "B08X445VQ8",
+          "B081K4Q6KQ"
+        ],
+        "precision@5": 0.0,
+        "recall@5": 0.0,
+        "reciprocal_rank": 0.0
+      },
+      {
+        "query": "kitchen device to heat food quickly",
+        "relevant_asins": [
+          "B0031CZIE2",
+          "B003SFEWEE",
+          "B005JA07VS",
+          "B00W8T2UM2",
+          "B00W8T3CS8",
+          "B00XXXSX46",
+          "B01K8II7KS",
+          "B0792VS59V",
+          "B07NWB62JW",
+          "B07TKDHFGP",
+          "B08VDWFRQG",
+          "B0B8YJL3LT",
+          "B0C4L98ZFV"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B0C4L98ZFV",
+          "B08D75HMWL",
+          "B01CU10J20",
+          "B074VC5W4K",
+          "B0B8YJL3LT"
+        ],
+        "precision@5": 0.4,
+        "recall@5": 0.1538,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Something to cook pizza in",
+        "relevant_asins": [
+          "B07DMM9G48",
+          "B083Q5JLS7",
+          "B08HCNYTDB",
+          "B09DPSFC7J"
+        ],
+        "num_judged": 14,
+        "retrieved_asins": [
+          "B07DMM9G48",
+          "B07W8G34QS",
+          "B08HCNYTDB",
+          "B09V2PQ1JJ",
+          "B09WVQ2WH3"
+        ],
+        "precision@5": 0.4,
+        "recall@5": 0.5,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Best appliances for a small apartment",
+        "relevant_asins": [
+          "B001C3W83Q",
+          "B01128A5LW",
+          "B06ZYN5T6G",
+          "B07DS3X4R1",
+          "B081MZFX2Z",
+          "B0895L6PLD",
+          "B08PYPQQ3Z",
+          "B08X35LL3L",
+          "B091CPLVRF",
+          "B0987DK532",
+          "B0992B7ZD7",
+          "B09HWVX1MH",
+          "B09KTZRP2V",
+          "B09N8NXR35",
+          "B09ZKX7SXG",
+          "B0B1ZK2JF1",
+          "B0B4FLTFY6",
+          "B0B68RLTG9",
+          "B0C2YZ8J5D",
+          "B0C69D5PS5"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B01128A5LW",
+          "B0B1ZK2JF1",
+          "B001C3W83Q",
+          "B098NDHV34",
+          "B09N8NXR35"
+        ],
+        "precision@5": 0.8,
+        "recall@5": 0.2,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Cheap mini fridge",
+        "relevant_asins": [
+          "B000XYN5RS",
+          "B005JAVC94",
+          "B00RNAH5OY",
+          "B01128A5LW",
+          "B06WVLRQVV",
+          "B07SW5WH4C",
+          "B07VG45PSC",
+          "B088JFW4QW",
+          "B0895L6PLD",
+          "B08FX645RV",
+          "B08GBM3TT7",
+          "B08HD31T8M",
+          "B08K3RCPK6",
+          "B08K8TB3ND",
+          "B0951WG98R",
+          "B097NYFSHX",
+          "B0987DK532",
+          "B09XHNF4C7",
+          "B0B5DCK6QP",
+          "B0B6Z36SC1",
+          "B0BLJ3NR25"
+        ],
+        "num_judged": 24,
+        "retrieved_asins": [
+          "B089B2WRS4",
+          "B088JFW4QW",
+          "B07SW5WH4C",
+          "B08K8TB3ND",
+          "B098LH9VBT"
+        ],
+        "precision@5": 0.6,
+        "recall@5": 0.1429,
+        "reciprocal_rank": 0.5
+      }
+    ]
+  },
+  "semantic": {
+    "summary": {
+      "retriever": "semantic",
+      "num_queries": 10,
+      "mean_precision@5": 0.68,
+      "mean_recall@5": 0.3892,
+      "mrr": 0.85
+    },
+    "per_query": [
+      {
+        "query": "Washing machine",
+        "relevant_asins": [
+          "B006BYHPKW",
+          "B00DJF6296",
+          "B00KYFJPFM",
+          "B07Q4VTTL9",
+          "B08FMND788",
+          "B08VDZBPR7",
+          "B08Y5QWGKS",
+          "B099NDZ8WC",
+          "B09L1LHFP8",
+          "B09P515RCX",
+          "B09TT5HQH8",
+          "B09VT3BS1G",
+          "B0B4P6G5QR",
+          "B0BLY369X3",
+          "B0BWBF4MN1",
+          "B0C2K7C29Z"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B08FMND788",
+          "B00DJF6296",
+          "B0C2K7C29Z",
+          "B08VDZBPR7",
+          "B0BLY369X3"
+        ],
+        "precision@5": 1.0,
+        "recall@5": 0.3125,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Stainless steel coffee maker",
+        "relevant_asins": [
+          "B00WT80GUU",
+          "B01N8XTE7J",
+          "B07D6L2QX2",
+          "B07X7MH6BG",
+          "B08BC23D68",
+          "B08FBDWXT5",
+          "B08FBFCSRQ",
+          "B0BCW332JG",
+          "B0BHTY25D2"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B08FBFCSRQ",
+          "B08TW7J1JQ",
+          "B07M5X8PNG",
+          "B08FBDWXT5",
+          "B0B45KHNSZ"
+        ],
+        "precision@5": 0.4,
+        "recall@5": 0.2222,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Replacement Parts DC61-02610A",
+        "relevant_asins": [
+          "B07SQ7TK58",
+          "B07T6CW9JH",
+          "B07X3875ZN",
+          "B07YPXWPSC",
+          "B07ZP6S236",
+          "B082XX6LTN",
+          "B08LVGGZFV",
+          "B08RYGY4HT",
+          "B08VS5296N",
+          "B08Y5JZCN3"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B0816KS5TC",
+          "B07YS41N82",
+          "B07V7DR7XX",
+          "B07TP6GGVM",
+          "B07R8ZDBPC"
+        ],
+        "precision@5": 0.0,
+        "recall@5": 0.0,
+        "reciprocal_rank": 0.0
+      },
+      {
+        "query": "Magic bullet",
+        "relevant_asins": [
+          "B01C855CYS"
+        ],
+        "num_judged": 18,
+        "retrieved_asins": [
+          "B01C855CYS",
+          "B00DM8J3MI",
+          "B01AXG7EO0",
+          "B00DW8A2IC",
+          "B07S388MQP"
+        ],
+        "precision@5": 0.2,
+        "recall@5": 1.0,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Whirlpool",
+        "relevant_asins": [
+          "B001DHKBP8",
+          "B001DPPE4S",
+          "B002ZNE8QM",
+          "B004Q3TXU0",
+          "B0050KJUE2",
+          "B005S4F96I",
+          "B008DJLQOY",
+          "B008DJLTGY",
+          "B0096OME8M",
+          "B009AV4D44",
+          "B00ECV2Y48",
+          "B00J8HV3ZC",
+          "B00LQDFZ0U",
+          "B072YV44XT",
+          "B073DFZGNV"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B073DFZGNV",
+          "B005S4F96I",
+          "B008DJLTGY",
+          "B008DJLQOY",
+          "B0096OME8M"
+        ],
+        "precision@5": 1.0,
+        "recall@5": 0.3333,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Washingmachine",
+        "relevant_asins": [
+          "B00DJF6296",
+          "B08CR3D5B6",
+          "B08FMND788",
+          "B08VDZBPR7",
+          "B08WK97GXF",
+          "B08Y5QWGKS",
+          "B094NB68J9",
+          "B0BLY369X3",
+          "B0BWBF4MN1"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B00DJF6296",
+          "B08FMND788",
+          "B0BWBF4MN1",
+          "B08CR3D5B6",
+          "B094NB68J9"
+        ],
+        "precision@5": 1.0,
+        "recall@5": 0.5556,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "kitchen device to heat food quickly",
+        "relevant_asins": [
+          "B0031CZIE2",
+          "B003SFEWEE",
+          "B005JA07VS",
+          "B00W8T2UM2",
+          "B00W8T3CS8",
+          "B00XXXSX46",
+          "B01K8II7KS",
+          "B0792VS59V",
+          "B07NWB62JW",
+          "B07TKDHFGP",
+          "B08VDWFRQG",
+          "B0B8YJL3LT",
+          "B0C4L98ZFV"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B0015G5AXU",
+          "B07TKDHFGP",
+          "B00W8T3CS8",
+          "B01K8II7KS",
+          "B08C4TKKR2"
+        ],
+        "precision@5": 0.6,
+        "recall@5": 0.2308,
+        "reciprocal_rank": 0.5
+      },
+      {
+        "query": "Something to cook pizza in",
+        "relevant_asins": [
+          "B07DMM9G48",
+          "B083Q5JLS7",
+          "B08HCNYTDB",
+          "B09DPSFC7J"
+        ],
+        "num_judged": 14,
+        "retrieved_asins": [
+          "B07DMM9G48",
+          "B08HCNYTDB",
+          "B083Q5JLS7",
+          "B00J5LP99M",
+          "B01FM3A13K"
+        ],
+        "precision@5": 0.6,
+        "recall@5": 0.75,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Best appliances for a small apartment",
+        "relevant_asins": [
+          "B001C3W83Q",
+          "B01128A5LW",
+          "B06ZYN5T6G",
+          "B07DS3X4R1",
+          "B081MZFX2Z",
+          "B0895L6PLD",
+          "B08PYPQQ3Z",
+          "B08X35LL3L",
+          "B091CPLVRF",
+          "B0987DK532",
+          "B0992B7ZD7",
+          "B09HWVX1MH",
+          "B09KTZRP2V",
+          "B09N8NXR35",
+          "B09ZKX7SXG",
+          "B0B1ZK2JF1",
+          "B0B4FLTFY6",
+          "B0B68RLTG9",
+          "B0C2YZ8J5D",
+          "B0C69D5PS5"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B0987DK532",
+          "B01128A5LW",
+          "B06ZYN5T6G",
+          "B07DS3X4R1",
+          "B0B4FLTFY6"
+        ],
+        "precision@5": 1.0,
+        "recall@5": 0.25,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Cheap mini fridge",
+        "relevant_asins": [
+          "B000XYN5RS",
+          "B005JAVC94",
+          "B00RNAH5OY",
+          "B01128A5LW",
+          "B06WVLRQVV",
+          "B07SW5WH4C",
+          "B07VG45PSC",
+          "B088JFW4QW",
+          "B0895L6PLD",
+          "B08FX645RV",
+          "B08GBM3TT7",
+          "B08HD31T8M",
+          "B08K3RCPK6",
+          "B08K8TB3ND",
+          "B0951WG98R",
+          "B097NYFSHX",
+          "B0987DK532",
+          "B09XHNF4C7",
+          "B0B5DCK6QP",
+          "B0B6Z36SC1",
+          "B0BLJ3NR25"
+        ],
+        "num_judged": 24,
+        "retrieved_asins": [
+          "B097NYFSHX",
+          "B00RNAH5OY",
+          "B01128A5LW",
+          "B0BLJ3NR25",
+          "B005JAVC94"
+        ],
+        "precision@5": 1.0,
+        "recall@5": 0.2381,
+        "reciprocal_rank": 1.0
+      }
+    ]
+  },
+  "hybrid": {
+    "summary": {
+      "retriever": "hybrid",
+      "num_queries": 10,
+      "mean_precision@5": 0.58,
+      "mean_recall@5": 0.3594,
+      "mrr": 0.85
+    },
+    "per_query": [
+      {
+        "query": "Washing machine",
+        "relevant_asins": [
+          "B006BYHPKW",
+          "B00DJF6296",
+          "B00KYFJPFM",
+          "B07Q4VTTL9",
+          "B08FMND788",
+          "B08VDZBPR7",
+          "B08Y5QWGKS",
+          "B099NDZ8WC",
+          "B09L1LHFP8",
+          "B09P515RCX",
+          "B09TT5HQH8",
+          "B09VT3BS1G",
+          "B0B4P6G5QR",
+          "B0BLY369X3",
+          "B0BWBF4MN1",
+          "B0C2K7C29Z"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B08FMND788",
+          "B09L1LHFP8",
+          "B09NRGSZM8",
+          "B00DJF6296",
+          "B09VT3BS1G"
+        ],
+        "precision@5": 0.8,
+        "recall@5": 0.25,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Stainless steel coffee maker",
+        "relevant_asins": [
+          "B00WT80GUU",
+          "B01N8XTE7J",
+          "B07D6L2QX2",
+          "B07X7MH6BG",
+          "B08BC23D68",
+          "B08FBDWXT5",
+          "B08FBFCSRQ",
+          "B0BCW332JG",
+          "B0BHTY25D2"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B00WT80GUU",
+          "B07X7MH6BG",
+          "B08FBFCSRQ",
+          "B0BHTY25D2",
+          "B08TW7J1JQ"
+        ],
+        "precision@5": 0.8,
+        "recall@5": 0.4444,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Replacement Parts DC61-02610A",
+        "relevant_asins": [
+          "B07SQ7TK58",
+          "B07T6CW9JH",
+          "B07X3875ZN",
+          "B07YPXWPSC",
+          "B07ZP6S236",
+          "B082XX6LTN",
+          "B08LVGGZFV",
+          "B08RYGY4HT",
+          "B08VS5296N",
+          "B08Y5JZCN3"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B07QS564MT",
+          "B082XX6LTN",
+          "B0816KS5TC",
+          "B08Y5JZCN3",
+          "B07YS41N82"
+        ],
+        "precision@5": 0.4,
+        "recall@5": 0.2,
+        "reciprocal_rank": 0.5
+      },
+      {
+        "query": "Magic bullet",
+        "relevant_asins": [
+          "B01C855CYS"
+        ],
+        "num_judged": 18,
+        "retrieved_asins": [
+          "B01C855CYS",
+          "B01AXG7EO0",
+          "B00DW8A2IC",
+          "B0BPSFXZ1P",
+          "B00DM8J3MI"
+        ],
+        "precision@5": 0.2,
+        "recall@5": 1.0,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Whirlpool",
+        "relevant_asins": [
+          "B001DHKBP8",
+          "B001DPPE4S",
+          "B002ZNE8QM",
+          "B004Q3TXU0",
+          "B0050KJUE2",
+          "B005S4F96I",
+          "B008DJLQOY",
+          "B008DJLTGY",
+          "B0096OME8M",
+          "B009AV4D44",
+          "B00ECV2Y48",
+          "B00J8HV3ZC",
+          "B00LQDFZ0U",
+          "B072YV44XT",
+          "B073DFZGNV"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B086G4WWZB",
+          "B073DFZGNV",
+          "B016NCF5OE",
+          "B005S4F96I",
+          "B086GH9HXG"
+        ],
+        "precision@5": 0.4,
+        "recall@5": 0.1333,
+        "reciprocal_rank": 0.5
+      },
+      {
+        "query": "Washingmachine",
+        "relevant_asins": [
+          "B00DJF6296",
+          "B08CR3D5B6",
+          "B08FMND788",
+          "B08VDZBPR7",
+          "B08WK97GXF",
+          "B08Y5QWGKS",
+          "B094NB68J9",
+          "B0BLY369X3",
+          "B0BWBF4MN1"
+        ],
+        "num_judged": 20,
+        "retrieved_asins": [
+          "B01GOYBVAS",
+          "B00DJF6296",
+          "B07BYNV7ZV",
+          "B08FMND788",
+          "B01KJ2FVFW"
+        ],
+        "precision@5": 0.4,
+        "recall@5": 0.2222,
+        "reciprocal_rank": 0.5
+      },
+      {
+        "query": "kitchen device to heat food quickly",
+        "relevant_asins": [
+          "B0031CZIE2",
+          "B003SFEWEE",
+          "B005JA07VS",
+          "B00W8T2UM2",
+          "B00W8T3CS8",
+          "B00XXXSX46",
+          "B01K8II7KS",
+          "B0792VS59V",
+          "B07NWB62JW",
+          "B07TKDHFGP",
+          "B08VDWFRQG",
+          "B0B8YJL3LT",
+          "B0C4L98ZFV"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B0C4L98ZFV",
+          "B0015G5AXU",
+          "B08D75HMWL",
+          "B07TKDHFGP",
+          "B01CU10J20"
+        ],
+        "precision@5": 0.4,
+        "recall@5": 0.1538,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Something to cook pizza in",
+        "relevant_asins": [
+          "B07DMM9G48",
+          "B083Q5JLS7",
+          "B08HCNYTDB",
+          "B09DPSFC7J"
+        ],
+        "num_judged": 14,
+        "retrieved_asins": [
+          "B07DMM9G48",
+          "B08HCNYTDB",
+          "B00J5LP99M",
+          "B083Q5JLS7",
+          "B09WVQ2WH3"
+        ],
+        "precision@5": 0.6,
+        "recall@5": 0.75,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Best appliances for a small apartment",
+        "relevant_asins": [
+          "B001C3W83Q",
+          "B01128A5LW",
+          "B06ZYN5T6G",
+          "B07DS3X4R1",
+          "B081MZFX2Z",
+          "B0895L6PLD",
+          "B08PYPQQ3Z",
+          "B08X35LL3L",
+          "B091CPLVRF",
+          "B0987DK532",
+          "B0992B7ZD7",
+          "B09HWVX1MH",
+          "B09KTZRP2V",
+          "B09N8NXR35",
+          "B09ZKX7SXG",
+          "B0B1ZK2JF1",
+          "B0B4FLTFY6",
+          "B0B68RLTG9",
+          "B0C2YZ8J5D",
+          "B0C69D5PS5"
+        ],
+        "num_judged": 21,
+        "retrieved_asins": [
+          "B01128A5LW",
+          "B0B4FLTFY6",
+          "B0987DK532",
+          "B0B1ZK2JF1",
+          "B001C3W83Q"
+        ],
+        "precision@5": 1.0,
+        "recall@5": 0.25,
+        "reciprocal_rank": 1.0
+      },
+      {
+        "query": "Cheap mini fridge",
+        "relevant_asins": [
+          "B000XYN5RS",
+          "B005JAVC94",
+          "B00RNAH5OY",
+          "B01128A5LW",
+          "B06WVLRQVV",
+          "B07SW5WH4C",
+          "B07VG45PSC",
+          "B088JFW4QW",
+          "B0895L6PLD",
+          "B08FX645RV",
+          "B08GBM3TT7",
+          "B08HD31T8M",
+          "B08K3RCPK6",
+          "B08K8TB3ND",
+          "B0951WG98R",
+          "B097NYFSHX",
+          "B0987DK532",
+          "B09XHNF4C7",
+          "B0B5DCK6QP",
+          "B0B6Z36SC1",
+          "B0BLJ3NR25"
+        ],
+        "num_judged": 24,
+        "retrieved_asins": [
+          "B08GBM3TT7",
+          "B0B6Z36SC1",
+          "B08FX645RV",
+          "B07VG45PSC",
+          "B089B2WRS4"
+        ],
+        "precision@5": 0.8,
+        "recall@5": 0.1905,
+        "reciprocal_rank": 1.0
+      }
+    ]
+  }
+}
