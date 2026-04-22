@@ -248,24 +248,6 @@ make help
         make build-rag
         ```
 
-    5.  **Build a manual retrieval labeling set:** pool top candidates from BM25, semantic, and hybrid search into a CSV for human relevance judgments.
-
-        ```bash
-        make build-eval-set
-        ```
-
-        This writes `data/eval/retrieval_labels.csv`. Manually fill the `relevant` column with `yes` or `no` for every pooled candidate row.
-
-        This step is intended to create the labeling file before human review. If `retrieval_labels.csv` already exists, the script will stop rather than overwrite it. To intentionally replace the file (warning: do not do), run `python src/build_retrieval_labels.py --force`.
-
-    6.  **Run retrieval evaluation:** after labeling every pooled candidate, evaluate BM25, semantic, and hybrid retrieval quantitatively with `precision@k`, `recall@k`, and `MRR`.
-
-        ```bash
-        make eval-retrieval
-        ```
-
-        This is the command to use for presenting quantitative evaluation results after the human judgments are complete. It reads the judged `data/eval/retrieval_labels.csv` file and writes summary and per-query metrics to `results/retrieval_eval_results.json`.
-
 5.  **Running the Web App** Launch the Streamlit dashboard:
 
     ```bash
@@ -287,3 +269,29 @@ To run the essential steps of the full pipeline `make clean`, `make process`, `m
 ``` bash
 make all
 ```
+
+7. **RAG Retrieval Evaluation**
+
+    We used a custom script-based approach rather than a RADAS workflow because the goal here was to evaluate the information retrieval component of the RAG system without introducing an LLM into the labelling pipeline itself.
+
+    1. **Build a manual retrieval labeling set:** pool top candidates from BM25, semantic, and hybrid search into a CSV for human relevance judgments.
+
+        ```bash
+        make build-eval-set
+        ```
+
+    This writes `data/eval/retrieval_labels.csv`. Manually fill the `relevant` column with `yes` or `no` for every pooled candidate row.
+
+    This step is intended to create the labeling file before human review. If `retrieval_labels.csv` already exists, the script will stop rather than overwrite it. To intentionally replace the file (warning: do not do), run `python src/build_retrieval_labels.py --force`.
+
+    2.  **Run retrieval evaluation:** after labeling every pooled candidate, evaluate BM25, semantic, and hybrid retrieval quantitatively with `precision@k`, `recall@k`, and `MRR`.
+
+        ```bash
+        make eval-retrieval
+        ```
+
+    This is the command to use for presenting quantitative evaluation results after the human judgments are complete. It reads the judged `data/eval/retrieval_labels.csv` file and writes summary and per-query metrics to `results/retrieval_eval_results.json`.
+
+    Each of the 10 tested queries can be biased towards BM25 or Semantic interpretation. Therefore, the terminal-based output after running this command shows the average scores across quieries. This gives a more fair evaluation to the retrieval method itself.
+
+    The summary results are shared in `final_discussion.md`.
