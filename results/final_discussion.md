@@ -193,7 +193,7 @@ The queries used to evaluate the app in Milestone 2 were exported to `retrieval_
 
 The output file, `retrieval_labels.csv`, is intended for human validation of relevance. To streamline this process, given the large number of results to be evaluated, ChatGPT-5 was first used to provide an initial screen, filling in the `relevance` column to categorize relevance to the query (`0` for not relevant, `1` for relevant). However, this process was only semi-supervised, as a spot check was manually performed using human judgment on the `relevance` column to assess quality and consistency; a few minor changes to the file were made. Relevance decisions were based on what a user would reasonably expect to retrieve for a query, not on whether a product was an exact lexical match. Some queries are broad, so relevance judgments were applied somewhat more leniently in those cases.
 
-### Evaluation Retreival
+### Evaluation Retrieval
 
 Codex was used to brainstorm and draft `evaluate_retrieval.py`. This script evaluates the retrieval component of the system using labeled relevance judgments from `retrieval_labels.csv`. It does not compare BM25, semantic, and hybrid systems by raw scores, since those scores are not necessarily on the same scale. Instead, it evaluates the ranked lists returned by each retriever against the human relevance labels. For each labeled query, the script retrieves the top-k (5) results from BM25, semantic, and hybrid retrieval, then computes precision@k, recall@k, and reciprocal rank.
 
@@ -229,7 +229,7 @@ Summary of `README` improvements:
 - A quality control review of all scripts were made
 - Updated `utils.py` to decode html entities in product review text [html.unescape() to clean_html()] and confirmed it works in streamlit hybrid rag search with 'steam oven'; no longer has &#34 in the context.
 - Removed unused imports in milestone2_rag.ipynb
-- Uupdated .gitignore to include .DS_store
+- Updated .gitignore to include .DS_store
 
 ## Step 4: Cloud Deployment Plan
 
@@ -263,7 +263,7 @@ a) *Updates to Code*
 - Connect AWS EC2 instance to Github: allow for AWS deployment tooling rather than manual SSH access
 - Set up Github actions in .github/workflows for testing
 - If successful, trigger deployment to EC2 through AWS CodeDeploy
-- Pipeline: push to Githun repo -> actions run -> deploy updated app to AWS
+- Pipeline: push to Github repo -> actions run -> deploy updated app to AWS
 
 b) *Updates to Data*
 
