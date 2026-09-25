@@ -229,7 +229,7 @@ Summary of `README` improvements:
 - Unnecessary files for final presentation were removed, including: flow charts for internal use and an old processed file used in Milestone 1 (`data/processed/merged.parquet`)
 - A quality control review of all scripts were made
 - Updated `src/utils.py` to decode html entities in product review text [`html.unescape()` to `clean_html()`] and confirmed it works in streamlit hybrid rag search with 'steam oven'; no longer has &#34 in the context.
-- Removed unused imports in `notebooks/milestone2_rag.ipynb`
+- Removed unused imports in `notebooks/03_rag_experiments.ipynb`
 - Updated `.gitignore` to include .DS_Store
 - Added out-of-scope query guardrail (`is_query_relevant()` in `src/prompts.py`) called in RAG modes in `app/app.py` before retrieval is attempted
 

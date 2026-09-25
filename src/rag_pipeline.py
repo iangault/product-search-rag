@@ -77,7 +77,7 @@ def get_torch_device():
     return "cuda" if torch.cuda.is_available() else "cpu"
 
 # Chunk document into smaller pieces
-# Documents are large based on milestone2_exploration.ipynb
+# Documents are large based on 02_processed_data_eda.ipynb
 # Better to feed into the LLM
 def load_chunked():
     """Load in parquet file and returns chunked documents"""

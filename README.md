@@ -1,12 +1,14 @@
-# DSCI 575 Project: Amazon Product Search Assistant
+# Product Search RAG
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](environment.yml)
 [![Built with Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-ff4b4b.svg)](https://streamlit.io/)
 
-Authors: Christine Chow and Ian Gault
+A Streamlit app for searching Amazon appliance products with BM25, semantic, and hybrid retrieval, plus retrieval-augmented generation (RAG) for answering product questions from review and metadata context.
 
-GitHub Repository: [UBC-MDS/DSCI_575_project_gaultian_chrchow](https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow)
+### Background
+
+This project started as a team project by Christine Chow and Ian Gault for DSCI 575 (Advanced Machine Learning) in the UBC Master of Data Science program. This repository is Ian's continuation of that work.
 
 ### Project Goal
 
@@ -88,12 +90,24 @@ To interact with the information retrieval systems, we developed a simple web ap
 
 * Out-of-scope query guardrail in RAG modes using LLM-based query filtering to reject queries unrelated to Amazon appliances, kitchen products, or product shopping.
 
+### Retrieval Evaluation Results
+
+Each retriever was scored on 10 test queries against human relevance labels (k = 5):
+
+| Retriever | Mean Precision@5 | Mean Recall@5 | MRR |
+|-----------|------------------|---------------|-----|
+| BM25 | 0.54 | 0.33 | 0.73 |
+| Semantic | 0.68 | 0.39 | 0.85 |
+| Hybrid | 0.58 | 0.36 | 0.85 |
+
+Semantic search scored highest on this query set, and tied with hybrid search on MRR. Some queries were written to favour semantic interpretation (for example, misspellings), which may explain part of the gap. See [`results/final_discussion.md`](results/final_discussion.md) for the full discussion and step 7 of [Installation and Setup](#installation-and-setup) to reproduce the numbers.
+
 ### Repository Structure
 
 BM25, semantic retrieval, and RAG components are defined in `src/` and built through separate indexing scripts.
 
 ```text
-DSCI_575_project_gaultian_chrchow/
+product-search-rag/
 ├── app/
 │   └── app.py
 │      Streamlit application for BM25, semantic, and RAG-based product search.
@@ -144,9 +158,10 @@ DSCI_575_project_gaultian_chrchow/
 │
 ├── notebooks/
 │   Project notebooks for EDA, preprocessing, and experimentation.
-│   - `milestone1_exploration.ipynb`
-│   - `milestone2_exploration.ipynb`
-│   - `milestone2_rag.ipynb`
+│   - `01_raw_data_eda.ipynb`
+│   - `02_processed_data_eda.ipynb`
+│   - `03_rag_experiments.ipynb`
+│   - `04_llm_comparison.ipynb`
 │
 ├── results/
 │   Project discussion notes, workflow diagrams, and retrieval evaluation outputs.
@@ -163,9 +178,6 @@ DSCI_575_project_gaultian_chrchow/
 │
 ├── makefile
 │   Convenience commands for environment setup, preprocessing, indexing, evaluation, app launch, and cleanup.
-│
-├── Milestone_submission.md
-│   Submission-specific project summary and milestone notes.
 │
 ├── README.md
 │   Project overview, setup instructions, and usage documentation.
@@ -185,8 +197,8 @@ make help
 1.  **Clone the repository** After opening a terminal, clone the repository and navigate to the project directory:
 
     ```bash
-    git clone https://github.com/UBC-MDS/DSCI_575_project_gaultian_chrchow.git
-    cd DSCI_575_project_gaultian_chrchow
+    git clone https://github.com/iangault/product-search-rag.git
+    cd product-search-rag
     ```
 
 2.  **Environment Setup**
@@ -201,10 +213,10 @@ make help
     ii. Activate the Conda environment:
 
 
-        conda activate 575_proj
+        conda activate product-search-rag
 
 
-3.  **Environment Variables** Create an `.env` file in root directory. Note: Do not commit this file to Github!
+3.  **Environment Variables** Create an `.env` file in the root directory. Note: do not commit this file to GitHub.
 
     ```bash
     GROQ_API_KEY=<your_groq_api_key>
@@ -230,9 +242,9 @@ make help
 
     2. **EDA** Optional step. Internal data exploration to inform analysis
 
-        a. Run all cells in `notebooks/milestone1_exploration.ipynb` for the earlier Milestone 1 exploration workflow.
+        a. Run all cells in `notebooks/01_raw_data_eda.ipynb` for the initial exploration of the raw data.
 
-        b. Run all cells in `notebooks/milestone2_exploration.ipynb` to explore `data/processed/processed.parquet` and confirm pre-processing steps taken in `import_process.py`. (Improvements made in Milestone 2)
+        b. Run all cells in `notebooks/02_processed_data_eda.ipynb` to explore `data/processed/processed.parquet` and confirm the pre-processing steps in `import_process.py`.
 
     3.  **Build IR indexes:** run the indexing script to build BM25 and Semantic search indices:
 
@@ -278,7 +290,7 @@ make all
 
 7. **RAG Retrieval Evaluation**
 
-    We used a custom script-based approach rather than a RADAS workflow because the goal here was to evaluate the information retrieval component of the RAG system without introducing an LLM into the labelling pipeline itself.
+    We used a custom script-based approach rather than a RAGAS workflow because the goal here was to evaluate the information retrieval component of the RAG system without introducing an LLM into the labelling pipeline itself.
 
     1. **Build a manual retrieval labeling set:** pool top candidates from BM25, semantic, and hybrid search into a CSV for human relevance judgments.
 
@@ -298,6 +310,6 @@ make all
 
     This is the command to use for presenting quantitative evaluation results after the human judgments are complete. It reads the judged `data/eval/retrieval_labels.csv` file and writes summary and per-query metrics to `results/retrieval_eval_results.json`.
 
-    Each of the 10 tested queries can be biased towards BM25 or Semantic interpretation. Therefore, the terminal-based output after running this command shows the average scores across quieries. This gives a more fair evaluation to the retrieval method itself.
+    Each of the 10 tested queries can be biased towards BM25 or Semantic interpretation. Therefore, the terminal-based output after running this command shows the average scores across queries. This gives a more fair evaluation to the retrieval method itself.
 
     The summary results are shared in `final_discussion.md`.
