@@ -1,4 +1,4 @@
-# Final Discussion
+# LLM Comparison and Retrieval Evaluation
 
 ## Step 1: Improve Your Workflow
 

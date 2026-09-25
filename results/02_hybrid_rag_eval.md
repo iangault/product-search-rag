@@ -1,5 +1,5 @@
 
-# Milestone 2
+# Hybrid RAG: Changes and Qualitative Evaluation
 
 ## Model Choice
 

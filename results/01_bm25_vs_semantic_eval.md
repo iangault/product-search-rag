@@ -1,4 +1,4 @@
-# Milestone 1: Qualitative Evaluation
+# BM25 vs. Semantic Search: Qualitative Evaluation
 
 Our dataset is a join of `metadata` and `product reviews` on the unique Amazon ID. This means that reviews are unique, but product metadata is repeated. For now, we have focused our qualitative evaluation on product metadata; however, there is room to address some current bugs. 
 

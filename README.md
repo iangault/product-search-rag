@@ -100,7 +100,7 @@ Each retriever was scored on 10 test queries against human relevance labels (k =
 | Semantic | 0.68 | 0.39 | 0.85 |
 | Hybrid | 0.58 | 0.36 | 0.85 |
 
-Semantic search scored highest on this query set, and tied with hybrid search on MRR. Some queries were written to favour semantic interpretation (for example, misspellings), which may explain part of the gap. See [`results/final_discussion.md`](results/final_discussion.md) for the full discussion and step 7 of [Installation and Setup](#installation-and-setup) to reproduce the numbers.
+Semantic search scored highest on this query set, and tied with hybrid search on MRR. Some queries were written to favour semantic interpretation (for example, misspellings), which may explain part of the gap. See [`results/03_llm_and_retrieval_eval.md`](results/03_llm_and_retrieval_eval.md) for the full discussion and step 7 of [Installation and Setup](#installation-and-setup) to reproduce the numbers.
 
 ### Repository Structure
 
@@ -165,9 +165,9 @@ product-search-rag/
 │
 ├── results/
 │   Project discussion notes, workflow diagrams, and retrieval evaluation outputs.
-│   - `final_discussion.md`
-│   - `milestone1_discussion.md`
-│   - `milestone2_discussion.md`
+│   - `01_bm25_vs_semantic_eval.md`
+│   - `02_hybrid_rag_eval.md`
+│   - `03_llm_and_retrieval_eval.md`
 │   - `retrieval_eval_results.json`
 │
 ├── requirements.txt
@@ -312,4 +312,4 @@ make all
 
     Each of the 10 tested queries can be biased towards BM25 or Semantic interpretation. Therefore, the terminal-based output after running this command shows the average scores across queries. This gives a more fair evaluation to the retrieval method itself.
 
-    The summary results are shared in `final_discussion.md`.
+    The summary results are shared in `03_llm_and_retrieval_eval.md`.
