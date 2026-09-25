@@ -2,7 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](environment.yml)
-[![Built with Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-ff4b4b.svg)](https://streamlit.io/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://bm-semantic-hybrid-search.streamlit.app/)
+[![Hugging Face Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-product--search--rag--data-yellow.svg)](https://huggingface.co/datasets/gaultian/product-search-rag-data)
 
 A Streamlit app for searching Amazon appliance products with BM25, semantic, and hybrid retrieval, plus retrieval-augmented generation (RAG) for answering product questions from review and metadata context.
 
