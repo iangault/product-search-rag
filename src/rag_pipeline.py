@@ -50,7 +50,7 @@ RETRIEVER_K = 5
 def get_llm():
     """Create the Groq client lazily so module import does not require API access."""
     return ChatGroq(
-        model="qwen/qwen3-32b",
+        model="qwen/qwen3.8-27b",
         temperature=0.2,  # adjust higher for more creative responses,
         max_tokens=1000,
     )

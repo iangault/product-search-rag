@@ -26,7 +26,7 @@ Semantic search was executed using the `all-MiniLM-L6-v2` transformer model from
 
 ### LLM Model
 
-We use `Qwen3-32B` via the [Groq API](https://console.groq.com/) as the LLM for both RAG pipelines. Qwen3 is an open-source large language model from Alibaba Cloud that generates clear, grounded answers when given retrieved product context. We picked the 32B size over smaller variants for better answer quality, and Groq's free API is fast enough for interactive use without requiring local GPU.
+We use `qwen/qwen3.8-27b` via the [Groq API](https://console.groq.com/) as the LLM for both RAG pipelines. Qwen is an open-source large language model family from Alibaba Cloud that generates clear, grounded answers when given retrieved product context. The project was originally developed and evaluated with `qwen/qwen3-32b`, which Groq has since retired, so we switched to the closest available Qwen model. Groq's free API is fast enough for interactive use without requiring local GPU.
 
 ### RAG Workflows
 
@@ -43,7 +43,7 @@ flowchart TD
     B --> C[Top-5 retrieved chunks]
     C --> D[relevant_text:<br/>format chunk metadata + text]
     D --> E[build_prompt:<br/>query + grounded context]
-    E --> F[Qwen3-32B via Groq API]
+    E --> F[Qwen3.8-27B via Groq API]
     F --> G[clean_response:<br/>remove think block]
     G --> H[Display answer +<br/>supporting source cards]
 ```
@@ -69,7 +69,7 @@ flowchart TD
     H --> I[Top-5 fused products]
     I --> J[relevant_text_hybrid:<br/>format product context]
     J --> K[build_prompt:<br/>query + grounded context]
-    K --> L[Qwen3-32B via Groq API]
+    K --> L[Qwen3.8-27B via Groq API]
     L --> M[clean_response:<br/>remove think block]
     M --> N[Display answer +<br/>supporting product cards]
 ```
