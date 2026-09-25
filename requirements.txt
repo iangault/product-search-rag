@@ -21,6 +21,7 @@ langchain==1.2.15
 langchain-community==0.4.1
 langchain-huggingface==1.2.2
 langchain-groq==1.1.2
+huggingface_hub==0.33.4
 
 # utils
 python-dotenv==1.2.2

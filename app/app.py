@@ -26,12 +26,19 @@ from src.rag_pipeline import (
 )
 from src.prompts import is_query_relevant
 from src.utils import clean_html
+from src.hf_data import ensure_processed_data, missing_files
 
 from dotenv import load_dotenv
 load_dotenv()
 
 
 st.title("Amazon Appliances Search 🛒", text_alignment="left")
+
+# On a fresh deploy the processed data and indexes are not in git,
+# so fetch them from Hugging Face before anything loads them
+if missing_files():
+    with st.spinner("Downloading data and indexes (first startup only)..."):
+        ensure_processed_data()
 
 # Processed Data
 data_path = root_dir / "data" / "processed" / "processed.parquet"

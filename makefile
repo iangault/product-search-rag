@@ -7,7 +7,7 @@ RED := \033[0;31m
 CYAN := \033[0;36m
 RESET := \033[0m
 
-.PHONY: help create prune process build-ir build-rag build-eval-set eval-retrieval run all clean
+.PHONY: help create prune process build-ir build-rag build-eval-set eval-retrieval upload-data run all clean
 
 # Help command to list available commands
 help:
@@ -19,6 +19,7 @@ help:
 	@echo -e "  $(YELLOW)make build-rag$(RESET)    - Build and save the RAG chunk index"
 	@echo -e "  $(YELLOW)make build-eval-set$(RESET) - Build pooled retrieval candidates for manual labeling"
 	@echo -e "  $(YELLOW)make eval-retrieval$(RESET) - Run retrieval evaluation with precision@k, recall@k, and MRR"
+	@echo -e "  $(YELLOW)make upload-data$(RESET)   - Upload processed data and indexes to Hugging Face (needs write token)"
 	@echo -e "  $(YELLOW)make run$(RESET)          - Run the Streamlit app locally"
 	@echo -e "  $(YELLOW)make all$(RESET)          - Clean artifacts, process data, build IR and RAG indexes, then run the app"
 	@echo -e "  $(YELLOW)make clean$(RESET)        - Remove processed data and saved retrieval artifacts"
@@ -60,6 +61,11 @@ eval-retrieval:
 	@echo -e "$(CYAN)Running retrieval evaluation...$(RESET)"
 	@python src/evaluate_retrieval.py
 	@echo -e "$(GREEN)Retrieval evaluation complete.$(RESET)"
+
+upload-data:
+	@echo -e "$(CYAN)Uploading processed data and indexes to Hugging Face...$(RESET)"
+	@python src/hf_data.py
+	@echo -e "$(GREEN)Upload complete.$(RESET)"
 
 # Run the Streamlit app
 run:
