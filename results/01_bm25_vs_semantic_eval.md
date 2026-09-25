@@ -8,7 +8,7 @@ We conducted a qualitative evaluation comparing BM25 and semantic search across 
 
 - We have duplicates in our search results. We are screening for 100 unique product titles and presenting the top 10 scores, but this may be contributing to errors for some products in a webapp search.
 - There may be 'junk' terms in the merged document that are not in natural language and reduce the effectiveness of the embedding index.
-- Performance for semantic search is poor. Further inquiry into the data pipeline is needed in a future milestone. We also need to understand why irrelevant results are sometimes returned.
+- Performance for semantic search is poor. Further inquiry into the data pipeline is needed in a later iteration. We also need to understand why irrelevant results are sometimes returned.
 - More edge cases will be needed, such as returning a score of 0.0.
 
 ## Query Inputs

@@ -1,10 +1,10 @@
 # LLM Comparison and Retrieval Evaluation
 
-## Step 1: Improve Your Workflow
+## Workflow Improvements
 
 ### Dataset Scaling
 
-We already imported 20k products and 200k reviews in milestone 2. We did not match products with reviews; instead, we left approximately half of the products without any reviews, while other products could have a range of reviews assigned. We thought this reflected differences in popularity among Amazon products online. No changes to sampling were made.
+We already imported 20k products and 200k reviews during the hybrid RAG work. We did not match products with reviews; instead, we left approximately half of the products without any reviews, while other products could have a range of reviews assigned. We thought this reflected differences in popularity among Amazon products online. No changes to sampling were made.
 
 ### LLM Experiment
 
@@ -175,21 +175,21 @@ Prompt structure:
 
 **Key Observations:**
 
-Overall both models performed comparably across the 5 queries. Both produced readable, grounded answers without hallucinating any products outside of the provided context. As noted in the Milestone 2 discussion, when the hybrid retriever returns poor retrieved results, answer quality in both models also drops. For example, in the "Magic Bullet" query where there was only 1 related result (which was a replacement part) in the dataset, both models had no choice but to return this single product.
+Overall both models performed comparably across the 5 queries. Both produced readable, grounded answers without hallucinating any products outside of the provided context. As noted in the hybrid RAG evaluation (`02_hybrid_rag_eval.md`), when the hybrid retriever returns poor retrieved results, answer quality in both models also drops. For example, in the "Magic Bullet" query where there was only 1 related result (which was a replacement part) in the dataset, both models had no choice but to return this single product.
 
 Of note, Qwen3-32B was more likely to flag products that had no reviews, as seen in queries "Stainless steel coffee maker" and "Best appliances for a small apartment". Interestingly, Llama 4 Scout was more likely to add followup prompts such as "Let me know if you'd like more information!" and "Would you like to explore more options or details about this product?" which gives it a more conversational feel.
 
 Since both models performed similarly overall, the choice of model would come down to preference. We liked how personable Llama 4 Scout felt but Qwen3-32B's behaviour that flags missing reviews from products would be more useful for a product search tool. Since Qwen3-32B is already implemented in the current pipeline, we kept it as is with no changes made.
 
-## Step 2: Additional Feature
+## Added Feature: Retrieval Evaluation
 
 ### Quantitative Evaluation
 
-We used a custom script-based approach rather than a RADAS workflow because the goal here was to evaluate the information retrieval component of the RAG system without introducing an LLM into the labelling pipeline itself. Codex was used to help brainstorm the purpose of this script and draft it, but was reviewed and appraised.
+We used a custom script-based approach rather than a RAGAS workflow because the goal here was to evaluate the information retrieval component of the RAG system without introducing an LLM into the labelling pipeline itself. Codex was used to help brainstorm the purpose of this script and draft it, but was reviewed and appraised.
 
 #### Building Retrieval Labels
 
-The queries used to evaluate the app in Milestone 2 were exported to `retrieval_queries.json` and reused as candidate queries in our quantitative evaluation. `build_retrieval_labels.py` loads the evaluation queries from the JSON file, runs BM25, semantic, and hybrid retrieval for each query, and pools the returned candidates into a single CSV for review. "Pooling" here means taking the union of products returned by the different retrievers for the same query. Each retriever returns its top 10 products. For each `parent_asin` that appears in any of the result lists, the script creates a row if that product has not been seen yet for the query, or updates the existing row if it has. The row tracks which retrievers returned the product, stores each retriever's rank and score in separate fields such as `bm25_rank`, `semantic_rank`, `bm25_score`, and `semantic_score`, and records `best_rank` as the highest placement the product achieved across the retrievers, meaning the smallest rank number it received.
+The queries used to evaluate the hybrid RAG pipeline were exported to `retrieval_queries.json` and reused as candidate queries in our quantitative evaluation. `build_retrieval_labels.py` loads the evaluation queries from the JSON file, runs BM25, semantic, and hybrid retrieval for each query, and pools the returned candidates into a single CSV for review. "Pooling" here means taking the union of products returned by the different retrievers for the same query. Each retriever returns its top 10 products. For each `parent_asin` that appears in any of the result lists, the script creates a row if that product has not been seen yet for the query, or updates the existing row if it has. The row tracks which retrievers returned the product, stores each retriever's rank and score in separate fields such as `bm25_rank`, `semantic_rank`, `bm25_score`, and `semantic_score`, and records `best_rank` as the highest placement the product achieved across the retrievers, meaning the smallest rank number it received.
 
 The output file, `retrieval_labels.csv`, is intended for human validation of relevance. To streamline this process, given the large number of results to be evaluated, ChatGPT-5 was first used to provide an initial screen, filling in the `relevance` column to categorize relevance to the query (`0` for not relevant, `1` for relevant). However, this process was only semi-supervised, as a spot check was manually performed using human judgment on the `relevance` column to assess quality and consistency; a few minor changes to the file were made. Relevance decisions were based on what a user would reasonably expect to retrieve for a query, not on whether a product was an exact lexical match. Some queries are broad, so relevance judgments were applied somewhat more leniently in those cases.
 
@@ -211,7 +211,7 @@ It is surprising that Semantic outperformed Hybrid, given clear weaknesses in bo
 
 Overall, the quantitative assessment shows modest performance. The user would be able to get an idea of what's available, with relevant products in the top 5 choices - given by a moderate precision and MRR. Recall is fairly low however, meaning that it's only finding part of the judged relevant set. An improvement to our analysis would be to add a filter to our searches so that either the top 10 results are returned or only results that are at least 80% of the top result's score are returned. Through the quantitative analysis, it became apparent that `Magic Bullet` has only one truly relevant product, yet nine other products are returned even though their scores are much worse. This may add noise to the interpretation of the quantitative measurements across retrieval modes.
 
-## Step 3: Improve Documentation and Code Quality
+## Documentation and Code Quality
 
 ### Documentation Update
 
@@ -226,14 +226,14 @@ Summary of `README` improvements:
 
 - Docstrings were confirmed as being present
 - Titles and purpose were added to each script
-- Unnecessary files for final presentation were removed, including: flow charts for internal use and an old processed file used in Milestone 1 (`data/processed/merged.parquet`)
+- Unnecessary files were removed, including: flow charts for internal use and an old processed file from the first iteration (`data/processed/merged.parquet`)
 - A quality control review of all scripts were made
 - Updated `src/utils.py` to decode html entities in product review text [`html.unescape()` to `clean_html()`] and confirmed it works in streamlit hybrid rag search with 'steam oven'; no longer has &#34 in the context.
 - Removed unused imports in `notebooks/03_rag_experiments.ipynb`
 - Updated `.gitignore` to include .DS_Store
 - Added out-of-scope query guardrail (`is_query_relevant()` in `src/prompts.py`) called in RAG modes in `app/app.py` before retrieval is attempted
 
-## Step 4: Cloud Deployment Plan
+## Cloud Deployment Plan
 
 We would deploy our Amazon Appliances Search engine on AWS using the following architecture:
 

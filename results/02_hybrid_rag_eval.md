@@ -31,7 +31,7 @@ The semantic retrieval path follows the same pattern: it derives parent_asin IDs
 
 ## Qualitative Evaluation of Hybrid RAG
 
-We ran the same 10 queries from Milestone 1 through the hybrid RAG pipeline. Each answer is rated on the following three dimensions below:
+We ran the same 10 queries from the BM25 vs. semantic evaluation (`01_bm25_vs_semantic_eval.md`) through the hybrid RAG pipeline. Each answer is rated on the following three dimensions below:
 
 - **Accuracy**: Is the answer factually correct based on the reviews? Yes/No
 - **Completeness**: Does the answer address all aspects of the question? Yes/No
