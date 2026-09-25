@@ -6,6 +6,10 @@
 
 A Streamlit app for searching Amazon appliance products with BM25, semantic, and hybrid retrieval, plus retrieval-augmented generation (RAG) for answering product questions from review and metadata context.
 
+**Live demo:** <https://bm-semantic-hybrid-search.streamlit.app/>
+
+The demo runs on Streamlit Community Cloud's free tier, so if nobody has used it for a while it may be asleep. Click the wake-up button and give it a minute or two to start. See [Deployment](#deployment) for how it is hosted.
+
 ### Background
 
 This project started as a team project by Christine Chow and Ian Gault for DSCI 575 (Advanced Machine Learning) in the UBC Master of Data Science program. This repository is Ian's continuation of that work.
@@ -127,6 +131,8 @@ product-search-rag/
 │       - `bm25_index.pkl`
 │       - `semantic.index`
 │       - `semantic.ids.npy`
+│       - `rag_faiss/index.faiss`, `rag_faiss/index.pkl`
+│       Not in git. Hosted on Hugging Face and downloaded by the app when missing (see Deployment).
 │
 ├── src/
 │   ├── bm25.py
@@ -143,6 +149,8 @@ product-search-rag/
 │   │   Hybrid retriever class combining BM25 and semantic search using Reciprocal Rank Fusion (RRF).
 │   ├── rag_pipeline.py
 │   │   RAG retrieval, prompt-building, and answer-generation helpers.
+│   ├── hf_data.py
+│   │   Downloads missing processed data and indexes from Hugging Face, and uploads rebuilt ones (`make upload-data`).
 │   ├── build_retrieval_labels.py
 │   │   Pools BM25, semantic, and hybrid results into a CSV for human relevance labeling.
 │   ├── evaluate_retrieval.py
@@ -250,7 +258,7 @@ make help
 
         Derived from `data/processed/processed.parquet`.
 
-        Due to the large file sizes, processed indexing artifacts are ignored by git, so `make build-ir` is an essential step to run BM25 and Semantic search in the app.
+        Due to the large file sizes, processed indexing artifacts are ignored by git. Either run `make build-ir` to build them locally, or skip steps 4.1 to 4.4 and let `make run` download the prebuilt copies from Hugging Face (see [Deployment](#deployment)).
 
         ```bash
         make build-ir
@@ -313,3 +321,45 @@ make all
     Each of the 10 tested queries can be biased towards BM25 or Semantic interpretation. Therefore, the terminal-based output after running this command shows the average scores across queries. This gives a more fair evaluation to the retrieval method itself.
 
     The summary results are shared in `03_llm_and_retrieval_eval.md`.
+
+### Deployment
+
+The app is deployed on [Streamlit Community Cloud](https://share.streamlit.io) at <https://bm-semantic-hybrid-search.streamlit.app/>. The large data files are hosted separately on the Hugging Face Hub.
+
+#### Hosting large data files on Hugging Face
+
+Streamlit Community Cloud builds the app from this GitHub repository, but the processed data and indexes in `data/processed/` (about 207 MB) are ignored by git. Committing them would make the repository large, and every rebuild of the indexes would add another copy to the git history.
+
+Instead, the files are stored in a public Hugging Face dataset: [gaultian/product-search-rag-data](https://huggingface.co/datasets/gaultian/product-search-rag-data).
+
+* **Download:** when the app starts, `src/hf_data.py` checks for the required files in `data/processed/` and downloads any that are missing. Locally, where the files already exist, nothing is downloaded. The dataset is public, so no token is needed.
+* **Upload:** `make upload-data` pushes the local files to the dataset. This needs a Hugging Face token with the **Write** role, saved with:
+
+    ```bash
+    huggingface-cli login
+    ```
+
+    Run this in a regular terminal, since it prompts for the token. An `HF_TOKEN` environment variable takes priority over the saved login, so if `HF_TOKEN` is set in your shell to a read-only token, the upload will fail with a permission error. The `HF_TOKEN` in `.env` does not affect the upload, since `src/hf_data.py` does not load `.env`.
+
+#### Streamlit Community Cloud settings
+
+The app was created at [share.streamlit.io](https://share.streamlit.io) with these settings:
+
+* **Repository:** `iangault/product-search-rag`, branch `main`
+* **Main file path:** `app/app.py`
+* **Python version:** 3.11 (under Advanced settings)
+* **Secrets** (under Advanced settings, or app Settings > Secrets later):
+
+    ```toml
+    GROQ_API_KEY = "<your_groq_api_key>"
+    ```
+
+Streamlit Cloud installs packages from `requirements.txt`. It does not use `environment.yml` or the makefile.
+
+#### Updating the deployed app
+
+* **Code changes:** push to `main`. Streamlit Cloud picks up the new commit and redeploys the app.
+* **Package changes:** edit `requirements.txt` and push. The environment is rebuilt, which can take several minutes because of `torch`.
+* **Secret changes:** edit them in the app's Settings > Secrets on share.streamlit.io. The app restarts with the new values.
+* **Data or index changes:** rebuild locally (`make all`, or the individual build steps), then run `make upload-data`. The deployed app only downloads files that are missing, so it may keep serving the old copies. Rebooting the app from the Streamlit Cloud dashboard may not clear files it already downloaded. If the old data is still showing after a reboot, delete the app and deploy it again with the same settings.
+* **Logs:** if a deploy fails or the app crashes, open the app while logged in to Streamlit and use **Manage app** in the bottom right to see the build and runtime logs.
